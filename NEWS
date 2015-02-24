@@ -1,4 +1,5 @@
 1.22.0
+---
 - libmpg123 version 41
 - Build fix: Avoid name clash on OSX SDK with "normal" being defined in an enum already.
 - More resilience against folks who do not check errors and rather pass NULL pointers around (see NEWS.libmpg123).
