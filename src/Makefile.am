@@ -4,234 +4,194 @@
 ## see COPYING and AUTHORS files in distribution or http://mpg123.org
 ## initially written by Nicholas J. Humfrey
 
-AM_CPPFLAGS = -DPKGLIBDIR="\"$(pkglibdir)\""
-mpg123_LDADD = $(LIBLTDL) libmpg123/libmpg123.la @MODULE_OBJ@ @OUTPUT_OBJ@ @OUTPUT_LIBS@
-mpg123_LDFLAGS = @EXEC_LT_LDFLAGS@ @OUTPUT_LDFLAGS@
+#AM_CFLAGS = 
+#AM_LDFLAGS = 
+AM_CPPFLAGS = -I$(top_srcdir)/src
 
-# The dependency on libmpg123 could/should vanish. Or not.
-# Does it matter much?
-out123_LDADD = $(LIBLTDL) libmpg123/libmpg123.la @MODULE_OBJ@ @OUTPUT_OBJ@ @OUTPUT_LIBS@
-out123_LDFLAGS = @EXEC_LT_LDFLAGS@ @OUTPUT_LDFLAGS@
+EXTRA_DIST = mpg123.h.in
 
-AM_CPPFLAGS += $(LTDLINCL) -I$(top_builddir)/src/libmpg123 -I$(top_srcdir)/src/libmpg123
-# libltdl is not mentioned here... it's not that trivial
-mpg123_DEPENDENCIES = @OUTPUT_OBJ@ @MODULE_OBJ@ libmpg123/libmpg123.la
-out123_DEPENDENCIES = @OUTPUT_OBJ@ @MODULE_OBJ@ libmpg123/libmpg123.la
+LIBS = @LIBMPG123_LIBS@
 
-SUBDIRS = output libmpg123
-EXTRA_DIST = legacy_module.c module.c sfifo.c sfifo.h mpg123-with-modules out123-with-modules
+EXTRA_PROGRAMS = testcpu
+testcpu_dependencies = getcpuflags.$(OBJEXT)
+testcpu_sources = testcpu.c
+testcpu_LDADD = getcpuflags.$(OBJEXT)
 
 
 CLEANFILES = *.a
 
-bin_PROGRAMS = mpg123 out123 mpg123-id3dump mpg123-strip
 
-mpg123_id3dump_DEPENDENCIES = libmpg123/libmpg123.la
-mpg123_id3dump_LDADD = libmpg123/libmpg123.la
+# The library can have different names, depending on largefile setup.
+# Libtool macros think they're smart. Because of that mpg123.la does not work, it must be libmpg123.la .
+lib_LTLIBRARIES = libmpg123.la
+nodist_include_HEADERS = mpg123.h
 
-mpg123_strip_DEPENDENCIES = libmpg123/libmpg123.la
-mpg123_strip_LDADD = libmpg123/libmpg123.la
+libmpg123_la_LDFLAGS = -no-undefined -version-info @LIBMPG123_VERSION@ -export-symbols-regex '^mpg123_'
+libmpg123_la_LIBADD = @DECODER_LOBJ@ @LFS_LOBJ@
+libmpg123_la_DEPENDENCIES = @DECODER_LOBJ@ @LFS_LOBJ@
 
-EXTRA_PROGRAMS = tests/seek_whence tests/noise tests/text tests/plain_id3
-
-mpg123_SOURCES = \
-	audio.c \
-	audio.h \
-	buffer.c \
-	buffer.h \
-	common.c \
-	common.h \
-	libmpg123/compat.c \
-	libmpg123/compat.h \
-	control_generic.c \
+libmpg123_la_SOURCES = \
+	intsym.h \
+	compat.c \
+	compat.h \
+	mpeghead.h \
+	parse.c \
+	parse.h \
+	frame.c \
+	format.c \
+	frame.h \
+	reader.h \
+	debug.h \
+	decode.h \
+	sample.h \
+	dct64.c \
+	synth.h \
+	synth_mono.h \
+	synth_ntom.h \
+	synth_8bit.h \
+	synths.h \
 	equalizer.c \
-	getlopt.c \
-	getlopt.h \
-	httpget.c \
-	httpget.h \
-	resolver.c \
-	resolver.h \
-	genre.h \
-	genre.c \
-	module.h \
-	mpg123.c \
-	mpg123app.h \
-	metaprint.c \
-	metaprint.h \
-	local.h \
-	local.c \
-	playlist.c \
-	playlist.h \
-	streamdump.h \
-	streamdump.c \
-	term.c \
-	term.h \
-	wav.c \
-	win32_support.h \
-	wavhead.h \
-	xfermem.c \
-	xfermem.h
+	huffman.h \
+	newhuffman.h \
+	icy.h \
+	icy2utf8.h \
+	id3.h \
+	id3.c \
+	true.h \
+	getbits.h \
+	optimize.h \
+	optimize.c \
+	readers.c \
+	tabinit.c \
+	libmpg123.c \
+	gapless.h \
+	mpg123lib_intern.h \
+	abi_align.h \
+	mangle.h \
+	getcpuflags.h \
+	index.h \
+	index.c
 
-# Replace common.h by sysutil.h!
-out123_SOURCES = \
-	audio.c \
-	audio.h \
-	buffer.c \
-	buffer.h \
-	sysutil.c \
-	sysutil.h \
-	common.h \
-	libmpg123/compat.c \
-	libmpg123/compat.h \
-	getlopt.c \
-	getlopt.h \
-	module.h \
-	out123.c \
-	mpg123app.h \
-	wav.c \
-	win32_support.h \
-	wavhead.h \
-	xfermem.c \
-	xfermem.h
+EXTRA_libmpg123_la_SOURCES = \
+	lfs_alias.c \
+	lfs_wrap.c \
+	icy.c \
+	icy2utf8.c \
+	l2tables.h \
+	layer1.c \
+	layer2.c \
+	layer3.c \
+	dither.h \
+	dither.c \
+	feature.c \
+	dct36_3dnowext.S \
+	dct36_3dnow.S \
+	dct36_sse.S \
+	dct36_x86_64.S \
+	dct36_avx.S \
+	dct36_neon.S \
+	dct36_neon64.S \
+	dct64_3dnowext.S \
+	dct64_3dnow.S \
+	dct64_altivec.c \
+	dct64_i386.c \
+	dct64_i486.c \
+	dct64_mmx.S \
+	dct64_sse.S \
+	dct64_sse_float.S \
+	dct64_x86_64.S \
+	dct64_x86_64_float.S \
+	dct64_neon.S \
+	dct64_neon_float.S \
+	dct64_neon64.S \
+	dct64_neon64_float.S \
+	dct64_avx.S \
+	dct64_avx_float.S \
+	synth_3dnowext.S \
+	synth_3dnow.S \
+	synth_altivec.c \
+	synth_i486.c \
+	synth_i586_dither.S \
+	synth_i586.S \
+	synth_mmx.S \
+	synth_sse3d.h \
+	synth_sse.S \
+	synth_sse_float.S \
+	synth_sse_s32.S \
+	synth_sse_accurate.S \
+	synth_stereo_sse_float.S \
+	synth_stereo_sse_s32.S \
+	synth_stereo_sse_accurate.S \
+	synth_x86_64.S \
+	synth_x86_64_float.S \
+	synth_x86_64_s32.S \
+	synth_x86_64_accurate.S \
+	synth_stereo_x86_64.S \
+	synth_stereo_x86_64_float.S \
+	synth_stereo_x86_64_s32.S \
+	synth_stereo_x86_64_accurate.S \
+	synth_arm.S \
+	synth_arm_accurate.S \
+	synth_neon.S \
+	synth_neon_float.S \
+	synth_neon_s32.S \
+	synth_neon_accurate.S \
+	synth_stereo_neon.S \
+	synth_stereo_neon_float.S \
+	synth_stereo_neon_s32.S \
+	synth_stereo_neon_accurate.S \
+	synth_neon64.S \
+	synth_neon64_float.S \
+	synth_neon64_s32.S \
+	synth_neon64_accurate.S \
+	synth_stereo_neon64.S \
+	synth_stereo_neon64_float.S \
+	synth_stereo_neon64_s32.S \
+	synth_stereo_neon64_accurate.S \
+	synth_stereo_avx.S \
+	synth_stereo_avx_float.S \
+	synth_stereo_avx_s32.S \
+	synth_stereo_avx_accurate.S \
+	ntom.c \
+	synth.c \
+	synth_8bit.c \
+	synth_real.c \
+	synth_s32.c \
+	equalizer_3dnow.S \
+	tabinit_mmx.S \
+	stringbuf.c \
+	getcpuflags.S \
+	getcpuflags_x86_64.S \
+	getcpuflags_arm.c \
+	check_neon.S \
+	l12_integer_tables.h \
+	l3_integer_tables.h
 
-mpg123_id3dump_SOURCES = mpg123-id3dump.c \
-	getlopt.c \
-	getlopt.h \
-	libmpg123/compat.c \
-	libmpg123/compat.h
+if USE_YASM_FOR_AVX
+## Override rules for the sources that should be assembled with yasm
 
-mpg123_strip_SOURCES = mpg123-strip.c \
-	getlopt.c \
-	getlopt.h \
-	libmpg123/compat.c \
-	libmpg123/compat.h
+AVX_SRCS = \
+	dct36_avx.S \
+	dct64_avx.S \
+	dct64_avx_float.S \
+	synth_stereo_avx.S \
+	synth_stereo_avx_float.S \
+	synth_stereo_avx_s32.S \
+	synth_stereo_avx_accurate.S
 
-if WIN32_CODES
-mpg123_SOURCES += \
-	win32_support.c \
-	win32_net.c
+AVX_OBJS = $(AVX_SRCS:.S=.@OBJEXT@)
 
-out123_SOURCES+= \
-	win32_support.c
+ASM_DEPS = \
+	mangle.h \
+	$(top_builddir)/src/config.h \
+	intsym.h
 
-mpg123_id3dump_SOURCES += \
-	win32_support.c
+$(AVX_OBJS): %.@OBJEXT@: %.S $(ASM_DEPS)
+	$(CPP) $(DEFAULT_INCLUDES) $(INCLUDES) -DASMALIGN_BALIGN $< | @YASM@ - @YASMFLAGS@ @YASM_FORMAT@ -o $@
+
+$(AVX_OBJS:.@OBJEXT@=.lo): %.lo: %.@OBJEXT@
+	@echo "# Generated by ltmain.sh (GNU libtool)" >$@
+	@echo "pic_object='$<'" >>$@
+	@echo "non_pic_object='$<'" >>$@
+
 endif
-
-# That is not nice... but it is how I manage to get the dependency on output/alsa.o without error about .deps/output/alsa.Tpo .
-# Did I mention that recursive make sucks?
-# Actually ... does that really make really here? Not been updated
-# for some time before. I need to revisit our build system.
-# `%'-style pattern rules are a GNU make extension
-#find output/ -name '*.c' | sort | perl -ne 'chomp; $mod=$_; $mod=~s/\.c$/.\$(OBJEXT)/;
-#print "$mod: $_ audio.h module.h\n";
-#print "\tcd output && \$(MAKE)\n\n";'
-
-output/aix.$(OBJEXT): output/aix.c audio.h module.h
-	cd output && $(MAKE)
-
-output/alib.$(OBJEXT): output/alib.c audio.h module.h
-	cd output && $(MAKE)
-
-output/alsa.$(OBJEXT): output/alsa.c audio.h module.h
-	cd output && $(MAKE)
-
-output/arts.$(OBJEXT): output/arts.c audio.h module.h
-	cd output && $(MAKE)
-
-output/coreaudio.$(OBJEXT): output/coreaudio.c audio.h module.h
-	cd output && $(MAKE)
-
-output/dummy.$(OBJEXT): output/dummy.c audio.h module.h
-	cd output && $(MAKE)
-
-output/esd.$(OBJEXT): output/esd.c audio.h module.h
-	cd output && $(MAKE)
-
-output/hp.$(OBJEXT): output/hp.c audio.h module.h
-	cd output && $(MAKE)
-
-output/jack.$(OBJEXT): output/jack.c audio.h module.h
-	cd output && $(MAKE)
-
-output/mint.$(OBJEXT): output/mint.c audio.h module.h
-	cd output && $(MAKE)
-
-output/nas.$(OBJEXT): output/nas.c audio.h module.h
-	cd output && $(MAKE)
-
-output/openal.$(OBJEXT): output/openal.c audio.h module.h
-	cd output && $(MAKE)
-
-output/os2.$(OBJEXT): output/os2.c audio.h module.h
-	cd output && $(MAKE)
-
-output/oss.$(OBJEXT): output/oss.c audio.h module.h
-	cd output && $(MAKE)
-
-output/portaudio.$(OBJEXT): output/portaudio.c audio.h module.h
-	cd output && $(MAKE)
-
-output/pulse.$(OBJEXT): output/pulse.c audio.h module.h
-	cd output && $(MAKE)
-
-output/qsa.$(OBJEXT): output/qsa.c audio.h module.h
-	cd output && $(MAKE)
-
-output/sdl.$(OBJEXT): output/sdl.c audio.h module.h
-	cd output && $(MAKE)
-
-output/sgi.$(OBJEXT): output/sgi.c audio.h module.h
-	cd output && $(MAKE)
-
-output/sndio.$(OBJEXT): output/sndio.c audio.h module.h
-	cd output && $(MAKE)
-
-output/sun.$(OBJEXT): output/sun.c audio.h module.h
-	cd output && $(MAKE)
-
-output/tinyalsa.$(OBJEXT): output/tinyalsa.c audio.h module.h
-	cd output && $(MAKE)
-
-output/win32.$(OBJEXT): output/win32.c audio.h module.h
-	cd output && $(MAKE)
-
-output/win32_wasapi.$(OBJEXT): output/win32_wasapi.c audio.h module.h
-	cd output && $(MAKE)
-
-# Would have to mention _all_ source files... Dammit, that's what the libmpg123/Makefile.am does!
-# But again, the a make $something here needs that stupid rule... WHY???
-libmpg123/libmpg123.la: config.h libmpg123/mpg123.h
-	cd libmpg123 && $(MAKE)
-
-tests_seek_whence_SOURCES = \
-tests/seek_whence.c \
-libmpg123/compat.h \
-libmpg123/compat.c
-
-tests_seek_whence_DEPENDENCIES = libmpg123/libmpg123.la
-tests_seek_whence_LDADD = libmpg123/libmpg123.la
-
-tests_noise_SOURCES = \
-tests/noise.c \
-libmpg123/compat.h \
-libmpg123/compat.c \
-libmpg123/dither.h \
-libmpg123/dither.c
-
-tests_text_SOURCES = \
-tests/text.c \
-tests/testtext.h \
-libmpg123/compat.h \
-libmpg123/compat.c
-
-tests_text_DEPENDENCIES = libmpg123/libmpg123.la
-tests_text_LDADD = libmpg123/libmpg123.la
-
-tests_plain_id3_SOURCES = \
-tests/plain_id3.c \
-libmpg123/compat.h \
-libmpg123/compat.c
-
-tests_plain_id3_DEPENDENCIES = libmpg123/libmpg123.la
-tests_plain_id3_LDADD = libmpg123/libmpg123.la

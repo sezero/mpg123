@@ -17,9 +17,8 @@ LIBMPG123_VERSION=$API_VERSION:$LIB_PATCHLEVEL:$API_VERSION
 AC_SUBST(LIBMPG123_VERSION)
 AC_SUBST(API_VERSION)
 
-AC_CONFIG_SRCDIR(src/mpg123.c)
+AC_CONFIG_SRCDIR(src/libmpg123.c)
 AC_CONFIG_AUX_DIR(build)
-AC_CONFIG_SRCDIR(doc)
 AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_HOST
 
@@ -42,8 +41,6 @@ Anyhow, continuing at your own risk.])
 else
 	AC_MSG_RESULT([no])
 fi
-
-buffer=enabled # try to build with buffer by default
 
 dnl ############# Compiler and tools Checks
 
@@ -225,51 +222,6 @@ AC_ARG_ENABLE(gapless,
               [
                 gapless="enabled"
                 AC_DEFINE(GAPLESS, 1, [ Define if gapless is enabled. ])
-              ]
-)
-
-AC_ARG_ENABLE(fifo,
-              [  --enable-fifo=[no/yes] FIFO support for control interface (auto-enabled on linux) ],
-              [
-                if test "x$enableval" = xyes
-                then
-                  fifo="enabled"
-                else
-                  fifo="disabled"
-                fi
-              ],
-              [
-                fifo="auto"
-              ]
-)
-
-AC_ARG_ENABLE(ipv6,
-              [  --enable-ipv6=[no/yes] IPv6 support (actually any protocol your libc does with getaddrinfo) ],
-              [
-                if test "x$enableval" = xyes
-                then
-                  ipv6="enabled"
-                else
-                  ipv6="disabled"
-                fi
-              ],
-              [
-                ipv6="auto"
-              ]
-)
-
-AC_ARG_ENABLE(network,
-              [  --enable-network=[no/yes] network support (http streams / webradio) ],
-              [
-                if test "x$enableval" = xyes
-                then
-                  network="enabled"
-                else
-                  network="disabled"
-                fi
-              ],
-              [
-                network="auto"
               ]
 )
 
@@ -627,13 +579,11 @@ case $host in
   ;;
   i@<:@3-7@:>@86-*-mingw32*)
     LIBS="$LIBS"
-    buffer=disabled
     cpu_type="x86"
     newoldwritesample=enabled
   ;;
   x86_64-*-mingw32*)
     LIBS="$LIBS"
-    buffer=disabled
     cpu_type="x86-64"
   ;;
   i386-*-nto-qnx*)
@@ -643,58 +593,38 @@ case $host in
 	i386-*)
 		AC_MSG_WARN([Unknown host operating system])
 		cpu_type="i386"
-		buffer=disabled
 		ADD_CPPFLAGS="-DGENERIC $ADD_CPPFLAGS"
     newoldwritesample=enabled
 	;;
 	i486-*)
 		AC_MSG_WARN([Unknown host operating system])
 		cpu_type="i486"
-		buffer=disabled
 		ADD_CPPFLAGS="-DGENERIC $ADD_CPPFLAGS"
     newoldwritesample=enabled
 	;;
 	i586-*)
 		AC_MSG_WARN([Unknown host operating system])
 		cpu_type="x86"
-		buffer=disabled
 		ADD_CPPFLAGS="-DGENERIC $ADD_CPPFLAGS"
     newoldwritesample=enabled
 	;;
 	i686-*)
 		AC_MSG_WARN([Unknown host operating system])
 		cpu_type="x86"
-		buffer=disabled
 		ADD_CPPFLAGS="-DGENERIC $ADD_CPPFLAGS"
     newoldwritesample=enabled
 	;;
 	x86_64-*)
 		AC_MSG_WARN([Unknown host operating system])
 		cpu_type="x86-64"
-		buffer=disabled
 		ADD_CPPFLAGS="-DGENERIC $ADD_CPPFLAGS"
 	;;
   *)
   	AC_MSG_WARN([Unknown host operating system])
     cpu_type="generic_fpu"
-    buffer=disabled
     ADD_CPPFLAGS="-DGENERIC $ADD_CPPFLAGS"
   ;;
 esac
-
-AC_ARG_ENABLE(buffer,
-  [  --enable-buffer=[yes/no] disable audio buffer code (default uses system whitelist... proper checks later) ],
-  [
-    if test "x$enableval" = xyes
-    then
-      echo "Note: Enabling buffer per request... perhaps it will not build anyway."
-      buffer="enabled"
-    else
-      echo "Note: Disabling buffer per request."
-      buffer="disabled"
-    fi
-  ]
-)
 
 AC_ARG_ENABLE(newoldwritesample,
 [  --enable-newoldwritesample=[no/yes] enable new/old WRITE_SAMPLE macro for non-accurate 16 bit output, faster on certain CPUs (default on on x86-32)],
@@ -811,35 +741,6 @@ else
   DECODER_LOBJ="$DECODER_LOBJ layer3.lo"
 fi
 
-AC_ARG_WITH([audio], [
-  --with-audio=<list of modules>  Select a list (or only one) of audio output modules (comma or space separated list).
-])
-AC_ARG_WITH([default-audio], [
-  --with-default-audio=aix            Use AIX as default audio output sub-system
-  --with-default-audio=alib           Use Alib as default audio output sub-system (for HPUX)
-  --with-default-audio=alsa           Use ALSA as default audio output sub-system (libasound)
-  --with-default-audio=tinyalsa       Use ALSA as default audio output sub-system (tinyalsa)
-  --with-default-audio=arts           Use aRts as default audio output sub-system (KDE sound server)
-  --with-default-audio=dummy          Use dummy as default audio (when no sound card is available)
-  --with-default-audio=esd            Use ESoundD as default audio output sub-system
-  --with-default-audio=hp             Use HP as default audio output sub-system
-  --with-default-audio=jack           Use JACK as default low-latency audio server
-  --with-default-audio=coreaudio      Use Mac OS X as default audio output sub-system (CoreAudio)
-  --with-default-audio=mint           Use MinT as default audio output sub-system (Atari)
-  --with-default-audio=nas            Use NAS as default audio output (Network Audio System)
-  --with-default-audio=os2            Use OS2 as default audio output sub-system
-  --with-default-audio=oss            Use OSS as default audio output sub-system (/dev/dsp)
-  --with-default-audio=portaudio      Use PortAudio as default audio output sub-system
-  --with-default-audio=pulse          Use Pulse audio server as default audio output sub-system
-  --with-default-audio=qsa            Use QSA as default audio output sub-system
-  --with-default-audio=sdl            Use SDL as default audio output sub-system (Simple DirectMedia Layer)
-  --with-default-audio=sgi            Use SGI as default audio output sub-system (IRIX)
-  --with-default-audio=sndio          Use OpenBSD's sndio as default audio output sub-system
-  --with-default-audio=sun            Use Sun as default audio output sub-system (/dev/audio)
-  --with-default-audio=win32          Use Win32 audio as default audio output sub-system
-  --with-default-audio=win32_wasapi   Use Win32 wasapi audio as default audio output sub-system
-])
-
 AC_ARG_WITH([optimization], [
   --with-optimization=0   No Optimization
   --with-optimization=1   Limited Optimization (-O) (for gcc)
@@ -852,21 +753,6 @@ AC_ARG_WITH([seektable], [
   --with-seektable=<size> choose size of seek index table (0 disables it), default 1000
 ])
 
-
-dnl ############## Modules
-
-# Dummy audio output module is always supported
-output_modules="dummy"
-
-# Decide on module file suffix. Setting it != .la allows removal of .la files.
-AC_ARG_WITH([module-suffix], [
-  --with-module-suffix=.la            (default) Use libtool's .la files for loading modules.
-  --with-module-suffix=[.so|.dll|...] Specify the native module file suffix to bypass .la files.
-])
-if test x"$with_module_suffix" = x; then
-  with_module_suffix=.la
-fi
-AC_DEFINE_UNQUOTED( MODULE_FILE_SUFFIX, "$with_module_suffix", [The suffix for module files.] )
 
 dnl ############## Assembler, compiler properties
 
@@ -1062,59 +948,11 @@ AC_SUBST(LFS_LOBJ)
 
 dnl ############## Function Checks
 
-AC_FUNC_MMAP
-
-# Check if system supports termios
-AC_SYS_POSIX_TERMIOS
-if test "x$ac_cv_sys_posix_termios" = "xyes"; then
-  AC_DEFINE_UNQUOTED([HAVE_TERMIOS], 1, 
-  [Define this if you have the POSIX termios library])
-fi
-
-AC_CHECK_FUNCS( random )
-
-# Check for sched_setscheduler
-AC_CHECK_FUNCS( sched_setscheduler setuid getuid)
-
-# Check for setpriority
-AC_CHECK_FUNCS( setpriority )
-
 AC_CHECK_FUNCS( strerror )
-
-AC_CHECK_FUNCS( setlocale nl_langinfo )
 
 AC_CHECK_FUNCS( strdup )
 
-AC_CHECK_FUNCS( atoll )
-
-AC_CHECK_FUNCS( mkfifo, [ have_mkfifo=yes ], [ have_mkfifo=no ] )
-
 dnl ############## Header and Library Checks
-
-# locale headers
-AC_CHECK_HEADERS([locale.h langinfo.h])
-# Headers for network (http) stuff
-network_type=Unknown
-AC_CHECK_HEADERS([netdb.h sys/param.h sys/socket.h netinet/in.h arpa/inet.h])
-if test "x$ac_cv_header_netdb_h" = "xyes"      &&
-   test "x$ac_cv_header_sys_param_h" = "xyes"  &&
-   test "x$ac_cv_header_sys_socket_h" = "xyes" &&
-   test "x$ac_cv_header_netinet_in_h" = "xyes" &&
-   test "x$ac_cv_header_arpa_inet_h"  = "xyes"; then
-  have_network=yes
-  network_type=Posix
-else
-  have_network=no
-fi
-
-dnl trying to get that socket lib settled in one line
-AC_SEARCH_LIBS(gethostbyname, nsl socket) 
-dnl OK, two lines... Solaris needs -lnsl -lsocket
-AC_SEARCH_LIBS(socket, socket) 
-
-AC_CHECK_FUNCS( getaddrinfo, [ have_ipv6=yes ], [ have_ipv6=no ] )
-
-APR_CHECK_GETADDRINFO_ADDRCONFIG()
 
 # Substitutions for the installable mpg123.h header
 if test "x$ac_cv_header_stdio_h" = "xyes"; then
@@ -1481,647 +1319,9 @@ if test x"$ccalign" = xyes; then
 fi
 
 
-dnl ############## Output module choice
-
-# The full list of supported modules to check, first come, first serve.
-check_modules="alsa tinyalsa oss coreaudio sndio sun win32 win32_wasapi os2 esd jack portaudio pulse sdl nas arts openal dummy"
-# Only check qsa before all else on QNX.
-# It would mask ALSA otherwise.
-case $host in
-  *-nto-qnx*)
-    check_modules="qsa $check_modules"
-  ;;
-esac
-
-# The final list.
-output_modules=
-
-check_forced=no
-check_failed=no
-if test "x$with_audio" != "x"; then
-	check_modules="`echo $with_audio|tr , ' '` dummy"
-	echo "Limiting outputs to build according to your preference: $check_modules"
-	check_forced=yes
-fi
-
-PKG_PROG_PKG_CONFIG([])
-
-# Now go through the modules to check and do the chores.
-for m in $check_modules
-do
-	case "$m" in
-		dummy)
-			AC_MSG_CHECKING([if you are too dumbing dumb for the dummy])
-			AC_MSG_RESULT([no])
-			output_modules="$output_modules dummy"
-			HAVE_DUMMY=yes
-		;;
-		oss)
-			AC_CHECK_HEADERS([sys/soundcard.h linux/soundcard.h machine/soundcard.h])
-			if test "x${ac_cv_header_sys_soundcard_h}" = "xyes" \
-				 -o "x${ac_cv_header_linux_soundcard_h}" = "xyes" \
-				 -o "x${ac_cv_header_machine_soundcard_h}" = "xyes";
-			then
-				output_modules="$output_modules oss"
-				HAVE_OSS="yes"
-			else
-				check_failed=yes
-			fi
-		;;
-		tinyalsa)
-			TINYALSA_LIBS="-ltinyalsa"
-			# Check for ALSA
-			AC_CHECK_LIB( [tinyalsa], [pcm_open],
-				[ AC_CHECK_HEADER( [tinyalsa/asoundlib.h],
-					[ output_modules="$output_modules tinyalsa" HAVE_TINYALSA="yes"],
-					[ AC_MSG_WARN([Found TINYALSA library but NOT header files on your system]) ] )
-				]
-			)
-			if test "x$HAVE_TINYALSA" != xyes; then
-				check_failed=yes
-			fi
-		;;
-		# QSA and ALSA are not distinguishable in these tests, need to block
-		# each other and play with test order depending on platform.
-		alsa)
-			if test "x$HAVE_QSA" = xyes; then
-				HAVE_ALSA=no
-			else
-
-			ALSA_LIBS="-lasound"
-			# Check for ALSA
-			AC_CHECK_LIB( [asound], [snd_pcm_open],
-				[ AC_CHECK_HEADER( [alsa/asoundlib.h],
-					[ output_modules="$output_modules alsa" HAVE_ALSA="yes"],
-					[ AC_MSG_WARN([Found ALSA library but NOT header files on your system]) ] )
-				]
-			)
-			if test "x$HAVE_ALSA" != xyes; then
-				check_failed=yes
-			fi
-
-			fi # HAVE_QSA
-		;;
-		qsa)
-			if test "x$HAVE_ALSA" = xyes; then
-				HAVE_QSA=no
-			else
-
-			QSA_LIBS="-lasound"
-			# Check for QSA
-			AC_CHECK_LIB( [asound], [snd_pcm_open],
-				[ AC_CHECK_HEADER( [sys/asoundlib.h],
-					[ output_modules="$output_modules qsa" HAVE_QSA="yes"],
-					[ AC_MSG_WARN([Found QSA library but NOT header files on your system]) ] )
-				]
-			)
-			if test "x$HAVE_QSA" != xyes; then
-				check_failed=yes
-			fi
-
-			fi # HAVE_ALSA
-		;;
-		jack)
-			PKG_CHECK_MODULES(JACK, jack, output_modules="$output_modules jack" HAVE_JACK="yes", HAVE_JACK="no" check_failed=yes)
-		;;
-		pulse)
-			PKG_CHECK_MODULES(PULSE, libpulse-simple, output_modules="$output_modules pulse" HAVE_PULSE="yes", HAVE_PULSE="no" check_failed=yes)
-		;;
-		esd)
-			PKG_CHECK_MODULES(ESD, esound, output_modules="$output_modules esd" HAVE_ESD="yes", HAVE_ESD="no" check_failed=yes)
-		;;
-		portaudio)
-			# Remember: This looks only insane because you chose an insane tab width!
-			PORTAUDIO_LIBS="-lportaudio"
-			PORTAUDIO_CFLAGS=
-			case $host in
-				*-*-mingw32)
-					# We tested portaudio with MME
-					if test "x$HAVE_PORTAUDIO" != "xyes"; then
-						AC_CHECK_LIB( [portaudio], [Pa_Initialize],
-							[ AC_CHECK_HEADER( [portaudio.h],
-								[ output_modules="$output_modules portaudio" HAVE_PORTAUDIO_WINMM="yes" HAVE_PORTAUDIO="yes" ],
-								[ AC_MSG_WARN([Found PortAudio library but NOT header files on your system]) ] )
-								PORTAUDIO_LIBS="$PORTAUDIO_LIBS -lwinmm"
-							],
-							[ HAVE_PORTAUDIO="no"],
-							[ -lwinmm ]
-						)
-					fi
-				;;
-				*)
-					AC_CHECK_LIB( [portaudio], [Pa_Initialize],
-						[ AC_CHECK_HEADER( [portaudio.h],
-							[ output_modules="$output_modules portaudio" HAVE_PORTAUDIO="yes" ],
-							[ AC_MSG_WARN([Found PortAudio library but NOT header files on your system]) ] )
-						]
-					)
-				;;
-			esac
-			if test "x$HAVE_PORTAUDIO" != xyes; then
-				check_failed=yes
-			else
-				# See if we have v19 or v18
-				AC_CHECK_LIB( [portaudio], [Pa_GetVersion], [:], [AC_DEFINE( [PORTAUDIO18], 1, [Define if portaudio v18 API is wanted.]) ], [$PORTAUDIO_LIBS] )
-			fi
-		;;
-		sdl)
-			PKG_CHECK_MODULES(SDL, sdl, output_modules="$output_modules sdl" HAVE_SDL="yes", HAVE_SDL="no" check_failed=yes)
-		;;
-		nas)
-			NAS_LIBS=-laudio
-			AC_CHECK_LIB( [audio], [AuOpenServer],
-				[ AC_CHECK_HEADER( [audio/audiolib.h],
-					[ output_modules="$output_modules nas" HAVE_NAS="yes"],
-					[ AC_MSG_WARN([Found NAS library but NOT header files on your system]) ] )
-				]
-			)
-			if test "x$HAVE_NAS" != xyes; then
-				check_failed=yes
-			fi
-		;;
-		win32)
-			# Check for windows ... and win32 audio
-			# Does not work... instead just check for header
-			# AC_CHECK_LIB( [winmm], [waveOutOpen] )
-			WIN32_LIBS=-lwinmm
-			AC_CHECK_HEADERS([windows.h], output_modules="$output_modules win32" HAVE_WIN32=yes, HAVE_WIN32=no check_failed=yes)
-		;;
-		win32_wasapi)
-			# Check for windows ... and win32 wasapi audio
-			# Does not work... instead just check for header
-			# AC_CHECK_LIB( [avrt], [] )
-            AC_MSG_CHECKING([if we have wasapi headers])
-            OLD_LIBS=$LIBS
-            LIBS="$LIBS -lole32 -lavrt"
-            AC_LINK_IFELSE([AC_LANG_SOURCE([
-#define COBJMACROS 1
-#define _WIN32_WINNT 0x601
-#include <initguid.h>
-#include <audioclient.h>
-#include <mmdeviceapi.h>
-#include <avrt.h>
-int main(){
-  /* UUID Checks */
-  GUID *IDs[] = {
-    &CLSID_MMDeviceEnumerator,
-    &IID_IMMDeviceEnumerator,
-    &IID_IAudioClient,
-    &IID_IAudioRenderClient
-  };
-  return 0;
-}
-    ])], [HAVE_WIN32_WASAPI=yes], [HAVE_WIN32_WASAPI=no])
-			LIBS=$OLD_LIBS
-			WIN32_WASAPI_LIBS="-lole32 -lavrt"
-			AC_MSG_RESULT([$HAVE_WIN32_WASAPI])
-			if test "x$HAVE_WIN32_WASAPI" = xyes; then
-				output_modules="$output_modules win32_wasapi"
-			else
-				check_failed=yes
-			fi
-		;;
-		sndio)
-			SNDIO_LIBS=-lsndio
-			AC_CHECK_LIB([sndio], [sio_open],
-				[AC_CHECK_HEADERS([sndio.h],
-					[output_modules="$output_modules sndio" HAVE_SNDIO="yes"])
-				]
-			)
-			if test "x$HAVE_SNDIO" != xyes; then
-				check_failed=yes
-			fi
-		;;
-		sun)
-			AC_CHECK_HEADERS([sun/audioio.h sys/audioio.h asm/audioio.h sys/audio.h])
-			if test "x${ac_cv_header_sun_audioio_h}" = "xyes" \
-				 -o "x${ac_cv_header_sys_audioio_h}" = "xyes" \
-				 -o "x${ac_cv_header_asm_audioio_h}" = "xyes";
-			then
-				output_modules="$output_modules sun"
-				HAVE_SUN="yes"
-			else
-				check_failed=yes
-			fi
-		;;
-		coreaudio)
-			COREAUDIO_LIBS="-framework AudioToolbox -framework AudioUnit -framework CoreServices"
-			AC_CHECK_HEADERS([AudioUnit/AudioUnit.h CoreServices/CoreServices.h AudioToolbox/AudioToolbox.h])
-			if test "x${ac_cv_header_AudioUnit_AudioUnit_h}" = "xyes" \
-				 -a "x${ac_cv_header_CoreServices_CoreServices_h}" = "xyes" \
-				 -a "x${ac_cv_header_AudioToolbox_AudioToolbox_h}" = "xyes";
-			then
-				if test x"$modules" = xdisabled; then
-					AC_MSG_WARN([Disabling buffer because of directly linked CoreAudio! Use the module if you need the buffer.])
-					buffer=disabled
-				fi
-				output_modules="$output_modules coreaudio"
-				HAVE_COREAUDIO="yes"
-			else
-				check_failed=yes
-			fi
-		;;
-		arts)
-			AC_MSG_CHECKING([for artsc])
-			if artsc-config; then
-				AC_MSG_RESULT([yes])
-				output_modules="$output_modules arts"
-				HAVE_ARTS=yes
-				ARTS_LIBS=`artsc-config --libs`
-				ARTS_CFLAGS=`artsc-config --cflags`
-			else
-				AC_MSG_RESULT([no])
-				check_failed=yes
-			fi
-		;;
-		openal)
-			AC_CHECK_HEADERS([OpenAL/al.h OpenAL/alc.h AL/al.h AL/alc.h al.h alc.h])
-			if test "x${ac_cv_header_OpenAL_al_h}" = "xyes" \
-				 -a "x${ac_cv_header_OpenAL_alc_h}" = "xyes";
-			then #Mac OS X
-				output_modules="$output_modules openal"
-				OPENAL_LIBS="-framework OpenAL"
-				OPENAL_CFLAGS="-DOPENAL_SUBDIR_OPENAL"
-				HAVE_OPENAL="yes"
-			elif test "x${ac_cv_header_AL_al_h}" = "xyes" \
-				 -a "x${ac_cv_header_AL_alc_h}" = "xyes";
-			then #Linux
-				output_modules="$output_modules openal"
-				OPENAL_LIBS="-lopenal"
-				OPENAL_CFLAGS="-DOPENAL_SUBDIR_AL"
-				HAVE_OPENAL="yes"
-			elif test "x${ac_cv_header_al_h}" = "xyes" \
-				 -a "x${ac_cv_header_alc_h}" = "xyes";
-			then #Windows?
-				output_modules="$output_modules openal"
-				OPENAL_LIBS="-lopenal"
-				OPENAL_CFLAGS=""
-				HAVE_OPENAL="yes"
-			else
-				check_failed=yes
-			fi
-		;;
-		os2)
-			OS2_LIBS="-los2me -lmmpm2 -lsocket"
-			AC_CHECK_HEADERS([os2.h])
-			# os2me.h depends on os2.h
-			# Yes, that way of coding it is ugly.
-			if test "x${ac_cv_header_os2_h}" = xyes
-			then
-				# We mimick exactly the way how the header will be used.
-				# It seems to be picky...
-				AC_CHECK_HEADERS([os2me.h], [], [], [#define INCL_OS2MM
-#define INCL_DOS
-#define INCL_VIO
-#define INCL_KBD
-#include <os2.h>
-#])
-			fi
-			if test "x${ac_cv_header_os2_h}" = xyes \
-			   -a   "x${ac_cv_header_os2me_h}" = xyes
-			then
-				output_modules="$output_modules os2"
-				HAVE_OS2=yes
-			else
-				check_failed=yes
-			fi
-		;;
-# from here on only forced tests, untested code
-		hp)
-			# What's the deal with that and alib?
-			UNSUPPORTED_AUDIO=yes
-			AC_CHECK_HEADER([sys/audio.h], [output_modules="$output_modules hp" HAVE_HP=yes], [check_failed=yes])
-		;;
-		alib)
-			UNSUPPORTED_AUDIO=yes
-			# ALIB_CFLAGS="-I/opt/audio/include"
-			ALIB_LIBS=-lAlib
-			# These headers may not be all about audio but they are used.
-			AC_CHECK_HEADERS([ Alib.h CUlib.h netdb.h netinet/in.h netinet/tcp.h])
-			if test "x${ac_cv_header_Alib_h}" = xyes \
-			   -a   "x${ac_cv_header_CUlib_h}" = xyes \
-			   -a   "x${ac_cv_header_netdb_h}" = xyes \
-			   -a   "x${ac_cv_header_netinet_in_h}" = xyes \
-			   -a   "x${ac_cv_header_netinet_tcp_h}" = xyes
-			then
-				output_modules="$output_modules alib"
-				HAVE_ALIB=yes
-			else
-				check_failed=yes
-			fi
-		;;
-		mint)
-			UNSUPPORTED_AUDIO=yes
-			AC_CHECK_HEADERS([audios.h], [output_modules="$output_modules mint" HAVE_MINT=yes], [check_failes=yes])
-		;;
-		aix)
-			UNSUPPORTED_AUDIO=yes
-			AC_CHECK_HEADERS([sys/audio.h], [output_modules="$output_modules aix" HAVE_AIX=yes], [check_failed=yes])
-		;;
-		sgi)
-			UNSUPPORTED_AUDIO=yes
-			SGI_LIBS=-laudio
-			AC_CHECK_HEADER([dmedia/audio.h], [output_modules="$output_modules sgi" HAVE_SGI=yes], [check_failed=yes])
-		;;
-		*)
-			AC_MSG_ERROR([Unsupported/-known output '$m' demanded!])
-		;;
-	esac
-done
-
-if test "x$check_forced" = xyes -a "x$UNSUPPORTED_AUDIO" = xyes; then
-	AC_MSG_WARN([You requested bulding of an unsupported audio module. Be prepared for happy hacking and please tell us about your experience!])
-fi
-
-if test "x$check_forced" = xyes -a "x$check_failed" = "xyes"; then
-	AC_MSG_ERROR([One/some of your requested audio modules failed the test!])
-fi
-
-# When you extend check_modules, you should extend this:
-#for i in alsa qsa oss coreaudio sndio sun win32 win32_wasapi esd jack portaudio pulse sdl nas aix alib arts hp os2 sgi mint openal dummy
-#do echo $i; done |
-#perl -ne 'chomp; $big = uc($_); print <<EOT;
-#AC_SUBST(${big}_LIBS)
-#AC_SUBST(${big}_LDFLAGS)
-#AC_SUBST(${big}_CFLAGS)
-#AM_CONDITIONAL( [HAVE_$big], [test "x\$HAVE_$big" = xyes] )
-#EOT
-#'
-AC_SUBST(TINYALSA_LIBS)
-AC_SUBST(TINYALSA_LDFLAGS)
-AC_SUBST(TINYALSA_CFLAGS)
-AM_CONDITIONAL( [HAVE_TINYALSA], [test "x$HAVE_TINYALSA" = xyes] )
-AC_SUBST(ALSA_LIBS)
-AC_SUBST(ALSA_LDFLAGS)
-AC_SUBST(ALSA_CFLAGS)
-AM_CONDITIONAL( [HAVE_ALSA], [test "x$HAVE_ALSA" = xyes] )
-AC_SUBST(QSA_LIBS)
-AC_SUBST(QSA_LDFLAGS)
-AC_SUBST(QSA_CFLAGS)
-AM_CONDITIONAL( [HAVE_QSA], [test "x$HAVE_QSA" = xyes] )
-AC_SUBST(OSS_LIBS)
-AC_SUBST(OSS_LDFLAGS)
-AC_SUBST(OSS_CFLAGS)
-AM_CONDITIONAL( [HAVE_OSS], [test "x$HAVE_OSS" = xyes] )
-AC_SUBST(COREAUDIO_LIBS)
-AC_SUBST(COREAUDIO_LDFLAGS)
-AC_SUBST(COREAUDIO_CFLAGS)
-AM_CONDITIONAL( [HAVE_COREAUDIO], [test "x$HAVE_COREAUDIO" = xyes] )
-AC_SUBST(SNDIO_LIBS)
-AC_SUBST(SNDIO_LDFLAGS)
-AC_SUBST(SNDIO_CFLAGS)
-AM_CONDITIONAL( [HAVE_SNDIO], [test "x$HAVE_SNDIO" = xyes] )
-AC_SUBST(SUN_LIBS)
-AC_SUBST(SUN_LDFLAGS)
-AC_SUBST(SUN_CFLAGS)
-AM_CONDITIONAL( [HAVE_SUN], [test "x$HAVE_SUN" = xyes] )
-AC_SUBST(WIN32_LIBS)
-AC_SUBST(WIN32_LDFLAGS)
-AC_SUBST(WIN32_CFLAGS)
-AM_CONDITIONAL( [HAVE_WIN32], [test "x$HAVE_WIN32" = xyes] )
-AC_SUBST(WIN32_WASAPI_LIBS)
-AC_SUBST(WIN32_WASAPI_LDFLAGS)
-AC_SUBST(WIN32_WASAPI_CFLAGS)
-AM_CONDITIONAL( [HAVE_WIN32_WASAPI], [test "x$HAVE_WIN32_WASAPI" = xyes] )
-AC_SUBST(ESD_LIBS)
-AC_SUBST(ESD_LDFLAGS)
-AC_SUBST(ESD_CFLAGS)
-AM_CONDITIONAL( [HAVE_ESD], [test "x$HAVE_ESD" = xyes] )
-AC_SUBST(JACK_LIBS)
-AC_SUBST(JACK_LDFLAGS)
-AC_SUBST(JACK_CFLAGS)
-AM_CONDITIONAL( [HAVE_JACK], [test "x$HAVE_JACK" = xyes] )
-AC_SUBST(PORTAUDIO_LIBS)
-AC_SUBST(PORTAUDIO_LDFLAGS)
-AC_SUBST(PORTAUDIO_CFLAGS)
-AM_CONDITIONAL( [HAVE_PORTAUDIO], [test "x$HAVE_PORTAUDIO" = xyes] )
-AC_SUBST(PULSE_LIBS)
-AC_SUBST(PULSE_LDFLAGS)
-AC_SUBST(PULSE_CFLAGS)
-AM_CONDITIONAL( [HAVE_PULSE], [test "x$HAVE_PULSE" = xyes] )
-AC_SUBST(SDL_LIBS)
-AC_SUBST(SDL_LDFLAGS)
-AC_SUBST(SDL_CFLAGS)
-AM_CONDITIONAL( [HAVE_SDL], [test "x$HAVE_SDL" = xyes] )
-AC_SUBST(NAS_LIBS)
-AC_SUBST(NAS_LDFLAGS)
-AC_SUBST(NAS_CFLAGS)
-AM_CONDITIONAL( [HAVE_NAS], [test "x$HAVE_NAS" = xyes] )
-AC_SUBST(AIX_LIBS)
-AC_SUBST(AIX_LDFLAGS)
-AC_SUBST(AIX_CFLAGS)
-AM_CONDITIONAL( [HAVE_AIX], [test "x$HAVE_AIX" = xyes] )
-AC_SUBST(ALIB_LIBS)
-AC_SUBST(ALIB_LDFLAGS)
-AC_SUBST(ALIB_CFLAGS)
-AM_CONDITIONAL( [HAVE_ALIB], [test "x$HAVE_ALIB" = xyes] )
-AC_SUBST(ARTS_LIBS)
-AC_SUBST(ARTS_LDFLAGS)
-AC_SUBST(ARTS_CFLAGS)
-AM_CONDITIONAL( [HAVE_ARTS], [test "x$HAVE_ARTS" = xyes] )
-AC_SUBST(HP_LIBS)
-AC_SUBST(HP_LDFLAGS)
-AC_SUBST(HP_CFLAGS)
-AM_CONDITIONAL( [HAVE_HP], [test "x$HAVE_HP" = xyes] )
-AC_SUBST(OS2_LIBS)
-AC_SUBST(OS2_LDFLAGS)
-AC_SUBST(OS2_CFLAGS)
-AM_CONDITIONAL( [HAVE_OS2], [test "x$HAVE_OS2" = xyes] )
-AC_SUBST(SGI_LIBS)
-AC_SUBST(SGI_LDFLAGS)
-AC_SUBST(SGI_CFLAGS)
-AM_CONDITIONAL( [HAVE_SGI], [test "x$HAVE_SGI" = xyes] )
-AC_SUBST(MINT_LIBS)
-AC_SUBST(MINT_LDFLAGS)
-AC_SUBST(MINT_CFLAGS)
-AM_CONDITIONAL( [HAVE_MINT], [test "x$HAVE_MINT" = xyes] )
-AC_SUBST(OPENAL_LIBS)
-AC_SUBST(OPENAL_LDFLAGS)
-AC_SUBST(OPENAL_CFLAGS)
-AM_CONDITIONAL( [HAVE_OPENAL], [test "x$HAVE_OPENAL" = xyes] )
-AC_SUBST(DUMMY_LIBS)
-AC_SUBST(DUMMY_LDFLAGS)
-AC_SUBST(DUMMY_CFLAGS)
-AM_CONDITIONAL( [HAVE_DUMMY], [test "x$HAVE_DUMMY" = xyes] )
-
-# Did user choose default audio subsystem ?
-if test "x$with_default_audio" != "x"; then
-	default_output_module=$with_default_audio
-else 
-	default_output_module=`echo "$output_modules" | $AWK '{ print $1 }'`
-fi
-
-# That's (beginning of) the list for mpg123's internal default.
-default_output_modules=$default_output_module
-
-OUTPUT_OBJ=
-OUTPUT_MOD=
-OUTPUT_CFLAGS=
-OUTPUT_LIBS=
-OUTPUT_LDFLAGS=
-
-# Setup the static build.
-if test "x$modules" = xdisabled
-then
-	echo "Preparing static output $default_output_module"
-	OUTPUT_MOD="$default_output_module"
-	OUTPUT_OBJ="output/$default_output_module.\$(OBJEXT)"
-	OUTPUT_CFLAGS=
-	OUTPUT_LIBS=
-	# That feels stupid... what about hashed arrays?
-	case $OUTPUT_MOD in
-	# Here's a script for that tedious list, perhaps to be outsourced together with the one in src/output/Makefile.am
-#for i in tinyalsa alsa qsa coreaudio esd jack nas oss portaudio pulse sdl sndio sun win32 win32_wasapi aix alib arts hp os2 sgi mint openal
-#do echo $i; done |
-#perl -ne 'chomp; $big = uc($_); print <<EOT;
-#		$_)
-#			OUTPUT_LIBS="\$${big}_LIBS"
-#			OUTPUT_LDFLAGS="\$${big}_LDFLAGS"
-#			OUTPUT_CFLAGS="\$${big}_CFLAGS"
-#		;;
-#EOT
-#'
-		tinyalsa)
-			OUTPUT_LIBS="$TINYALSA_LIBS"
-			OUTPUT_LDFLAGS="$TINYALSA_LDFLAGS"
-			OUTPUT_CFLAGS="$TINYALSA_CFLAGS"
-		;;
-		alsa)
-			OUTPUT_LIBS="$ALSA_LIBS"
-			OUTPUT_LDFLAGS="$ALSA_LDFLAGS"
-			OUTPUT_CFLAGS="$ALSA_CFLAGS"
-		;;
-		qsa)
-			OUTPUT_LIBS="$QSA_LIBS"
-			OUTPUT_LDFLAGS="$QSA_LDFLAGS"
-			OUTPUT_CFLAGS="$QSA_CFLAGS"
-		;;
-		coreaudio)
-			OUTPUT_LIBS="$COREAUDIO_LIBS"
-			OUTPUT_LDFLAGS="$COREAUDIO_LDFLAGS"
-			OUTPUT_CFLAGS="$COREAUDIO_CFLAGS"
-		;;
-		esd)
-			OUTPUT_LIBS="$ESD_LIBS"
-			OUTPUT_LDFLAGS="$ESD_LDFLAGS"
-			OUTPUT_CFLAGS="$ESD_CFLAGS"
-		;;
-		jack)
-			OUTPUT_LIBS="$JACK_LIBS"
-			OUTPUT_LDFLAGS="$JACK_LDFLAGS"
-			OUTPUT_CFLAGS="$JACK_CFLAGS"
-		;;
-		nas)
-			OUTPUT_LIBS="$NAS_LIBS"
-			OUTPUT_LDFLAGS="$NAS_LDFLAGS"
-			OUTPUT_CFLAGS="$NAS_CFLAGS"
-		;;
-		oss)
-			OUTPUT_LIBS="$OSS_LIBS"
-			OUTPUT_LDFLAGS="$OSS_LDFLAGS"
-			OUTPUT_CFLAGS="$OSS_CFLAGS"
-		;;
-		portaudio)
-			OUTPUT_LIBS="$PORTAUDIO_LIBS"
-			OUTPUT_LDFLAGS="$PORTAUDIO_LDFLAGS"
-			OUTPUT_CFLAGS="$PORTAUDIO_CFLAGS"
-		;;
-		pulse)
-			OUTPUT_LIBS="$PULSE_LIBS"
-			OUTPUT_LDFLAGS="$PULSE_LDFLAGS"
-			OUTPUT_CFLAGS="$PULSE_CFLAGS"
-		;;
-		sdl)
-			OUTPUT_LIBS="$SDL_LIBS"
-			OUTPUT_LDFLAGS="$SDL_LDFLAGS"
-			OUTPUT_CFLAGS="$SDL_CFLAGS"
-		;;
-		sndio)
-			OUTPUT_LIBS="$SNDIO_LIBS"
-			OUTPUT_LDFLAGS="$SNDIO_LDFLAGS"
-			OUTPUT_CFLAGS="$SNDIO_CFLAGS"
-		;;
-		sun)
-			OUTPUT_LIBS="$SUN_LIBS"
-			OUTPUT_LDFLAGS="$SUN_LDFLAGS"
-			OUTPUT_CFLAGS="$SUN_CFLAGS"
-		;;
-		win32)
-			OUTPUT_LIBS="$WIN32_LIBS"
-			OUTPUT_LDFLAGS="$WIN32_LDFLAGS"
-			OUTPUT_CFLAGS="$WIN32_CFLAGS"
-		;;
-		win32_wasapi)
-			OUTPUT_LIBS="$WIN32_WASAPI_LIBS"
-			OUTPUT_LDFLAGS="$WIN32_WASAPI_LDFLAGS"
-			OUTPUT_CFLAGS="$WIN32_WASAPI_CFLAGS"
-		;;
-		aix)
-			OUTPUT_LIBS="$AIX_LIBS"
-			OUTPUT_LDFLAGS="$AIX_LDFLAGS"
-			OUTPUT_CFLAGS="$AIX_CFLAGS"
-		;;
-		alib)
-			OUTPUT_LIBS="$ALIB_LIBS"
-			OUTPUT_LDFLAGS="$ALIB_LDFLAGS"
-			OUTPUT_CFLAGS="$ALIB_CFLAGS"
-		;;
-		arts)
-			OUTPUT_LIBS="$ARTS_LIBS"
-			OUTPUT_LDFLAGS="$ARTS_LDFLAGS"
-			OUTPUT_CFLAGS="$ARTS_CFLAGS"
-		;;
-		hp)
-			OUTPUT_LIBS="$HP_LIBS"
-			OUTPUT_LDFLAGS="$HP_LDFLAGS"
-			OUTPUT_CFLAGS="$HP_CFLAGS"
-		;;
-		os2)
-			OUTPUT_LIBS="$OS2_LIBS"
-			OUTPUT_LDFLAGS="$OS2_LDFLAGS"
-			OUTPUT_CFLAGS="$OS2_CFLAGS"
-		;;
-		sgi)
-			OUTPUT_LIBS="$SGI_LIBS"
-			OUTPUT_LDFLAGS="$SGI_LDFLAGS"
-			OUTPUT_CFLAGS="$SGI_CFLAGS"
-		;;
-		mint)
-			OUTPUT_LIBS="$MINT_LIBS"
-			OUTPUT_LDFLAGS="$MINT_LDFLAGS"
-			OUTPUT_CFLAGS="$MINT_CFLAGS"
-		;;
-		openal)
-			OUTPUT_LIBS="$OPENAL_LIBS"
-			OUTPUT_LDFLAGS="$OPENAL_LDFLAGS"
-			OUTPUT_CFLAGS="$OPENAL_CFLAGS"
-		;;
-	esac
-else
-	# Now make a comma-separated list again... eliminating the possible duplicate and dummy.
-	for i in $output_modules
-	do
-		if test $i != $default_output_module && test $i != dummy; then
-			default_output_modules=$default_output_modules,$i
-		fi
-	done
-fi
-
-AC_DEFINE_UNQUOTED( DEFAULT_OUTPUT_MODULE, "$default_output_modules", [The default audio output module(s) to use] )
-
-
-AC_SUBST(OUTPUT_OBJ)
-AC_SUBST(OUTPUT_MOD)
-AC_SUBST(OUTPUT_CFLAGS)
-AC_SUBST(OUTPUT_LIBS)
-AC_SUBST(OUTPUT_LDFLAGS)
-
 dnl ############## Compiler Optimizations
 
 CFLAGS="$ADD_CFLAGS $CFLAGS"
-if test x"$buffer" = xdisabled; then
-	ADD_CPPFLAGS="$ADD_CPPFLAGS -DNOXFERMEM"
-fi
 if test x"$newoldwritesample" = xenabled; then
 	ADD_CPPFLAGS="$ADD_CPPFLAGS -DNEWOLD_WRITE_SAMPLE"
 fi
@@ -2193,8 +1393,6 @@ dnl ############## Win32 function checks
 # Check if we want Unicode for Win32. Cygwin does not need _wopen
 win32_specific_codes=disabled
 win32_unicode=unneeded
-win32_sockets=disabled
-win32_sockets_working=no
 win32_wide_working=no
 win32_winver_bump=no
 AC_CHECK_HEADERS([windows.h], [win32_specific_codes=enabled])
@@ -2238,98 +1436,14 @@ if test "x$win32_specific_codes" = xenabled && test "x$host_os" != "xcygwin"; th
     AC_MSG_WARN([Unicode File Open for Win32 disabled])
   fi
 
-#### Check for Network functions
-  AC_CHECK_HEADERS([ws2tcpip.h], [win32_sockets=enabled], [AC_MSG_WARN([Please update your headers to support winsock 2.2.])])
-  AC_MSG_CHECKING([if we want Win32 sockets])
-  if test "x$win32_sockets" = "xenabled" && test "x$network" != "xdisabled"; then
-  AC_MSG_RESULT([yes])
-  AC_MSG_CHECKING([if winsock2 API is available])
-    wsoldlibs="$LIBS"
-    LIBS="$LIBS -lws2_32"
-    AC_LINK_IFELSE([AC_LANG_SOURCE([
-      #include <winsock2.h>
-      #include <ws2tcpip.h>
-      #include <stdlib.h>
-      int main()
-      {
-        getaddrinfo(NULL, NULL, NULL, NULL);
-        freeaddrinfo(NULL);
-        return 0;
-      }
-    ])], [win32_sockets_working=yes], [win32_winver_bump=yes])
-    if test "x$win32_sockets_working" = "xno"; then
-      AC_MSG_CHECKING([deeper if winsock2 API is available])
-      AC_LINK_IFELSE([AC_LANG_SOURCE([
-        #define WINVER 0x501
-        #define _WIN32_WINNT 0x501
-        #include <winsock2.h>
-        #include <ws2tcpip.h>
-        #include <stdlib.h>
-        int main()
-        {
-          getaddrinfo(NULL, NULL, NULL, NULL);
-          freeaddrinfo(NULL);
-          return 0;
-        }
-      ])], [win32_sockets_working=yes], [AC_MSG_RESULT([no])])
-    fi
-    if test "x$win32_sockets_working" = "xyes"; then
-      AC_MSG_RESULT([yes])
-      AC_DEFINE([WANT_WIN32_SOCKETS], [1], [ Define to use Win32 sockets ])
-      network_type=Winsock2
-      have_network=yes
-      have_ipv6=yes
-    else
-      LIBS="$wsoldlibs"
-      AC_MSG_WARN([Please update your headers to support winsock 2.2.])
-    fi
-  else
-    AC_MSG_RESULT([no])
-  fi
-
-#### Check for Win32 Named Pipe functions
-win32_fifo_working=no
-if test x$win32_specific_codes = xenabled; then
-  AC_MSG_CHECKING([if we have Named Pipes])
-  if test "x$fifo" != "xdisabled"; then
-    AC_LINK_IFELSE([AC_LANG_SOURCE([
-    #include <windows.h>
-      int main(){
-        CreateNamedPipeA(NULL,PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED,PIPE_TYPE_BYTE,1,255,255,0,NULL);
-        CreateNamedPipeW(NULL,PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED,PIPE_TYPE_BYTE,1,255,255,0,NULL);
-        return 0;
-      }])],[win32_fifo_working=yes],[win32_winver_bump=yes])
-    if test "x$win32_fifo_working" != "xyes"; then
-    AC_LINK_IFELSE([AC_LANG_SOURCE([
-    #define WINVER 0x501
-    #define _WIN32_WINNT 0x501
-    #include <windows.h>
-      int main(){
-        CreateNamedPipeA(NULL,PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED,PIPE_TYPE_BYTE,1,255,255,0,NULL);
-        CreateNamedPipeW(NULL,PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED,PIPE_TYPE_BYTE,1,255,255,0,NULL);
-        return 0;
-      }])],[win32_fifo_working=yes],[win32_fifo_working=no])
-    fi
-  fi
-  have_mkfifo=$win32_fifo_working
-  if test "x$win32_fifo_working" = "xyes"; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE([WANT_WIN32_FIFO], [1], [ Define to use Win32 named pipes ])
-  else
-    AC_MSG_RESULT([no])
-  fi
-fi
-
 #### WINVER Bump
 if test x$win32_specific_codes = xenabled; then
   AC_MSG_CHECKING([if WINVER and _WIN32_WINNT needs version bumps])
   if test "x$win32_winver_bump" = "xyes"; then
     AC_MSG_RESULT([yes])
+  # MultiByteToWideChar and WideCharToMultiByte are available for Win2K and above
     AC_DEFINE([WINVER], [0x0501], [ WinXP and above for ipv6 ])
     AC_DEFINE([_WIN32_WINNT], [0x0501], [ WinXP and above for ipv6 ])
-    # getaddrinfo and freeaddrinfo are available for Win2K and above
-    # Bug: MinGW.org w32api ws2tcpip.h incorrectly wants (_WIN32_WINNT >= 0x0501) for getaddrinfo and freeaddrinfo
-    # MultiByteToWideChar and WideCharToMultiByte are available for Win2K and above
   else
     AC_MSG_RESULT([no])
   fi
@@ -2349,53 +1463,6 @@ AS_IF([test "x$eoverflow_present" = "xyes"],[],[AC_DEFINE([EOVERFLOW],[EFBIG],[U
 #### Use Win32 support codes
 AM_CONDITIONAL([WIN32_CODES], [ test "x$win32_specific_codes" = xenabled ])
 
-if test x"$network" = xauto; then
-	if test x"$have_network" = xyes; then
-		network=enabled
-	else
-		network=disabled
-	fi
-fi
-if test x"$ipv6" = xauto; then
-	if test x"$have_ipv6" = xyes; then
-		ipv6=enabled
-	else
-		ipv6=disabled
-	fi
-fi
-
-dnl ############## FIFO enable
-
-if test x"$fifo" = xauto; then
-	if test x"$have_mkfifo" = xyes; then
-		fifo=enabled
-	else
-		fifo=disabled
-	fi
-fi
-
-if test x"$fifo" = xenabled; then
-	AC_DEFINE(FIFO, 1, [ Define if FIFO support is enabled. ])
-	if test x"$have_mkfifo" = xno; then
-		AC_MSG_WARN( [ You forced FIFO code while I think there is no mkfifo() available! ] )
-	fi
-fi
-
-dnl ############## Network enable
-if test x"$network" = xenabled; then
-	AC_DEFINE(NETWORK, 1, [ Define if network support is enabled. ])
-	if test x"$have_network" = xno; then
-		AC_MSG_WARN( [ You forced network code while I think there is support missing! ] )
-	fi
-fi
-
-if test x"$ipv6" = xenabled; then
-	AC_DEFINE(IPV6, 1, [ Define if IPV6 support is enabled. ])
-	if test x"$have_ipv6" = xno; then
-		AC_MSG_WARN( [ You forced IPv6 code while I think there is no getaddrinfo() available! ] )
-	fi
-fi
-
 dnl ############## Final Output
 
 # Do that here to prevent the above tests usign -lltdl...
@@ -2408,12 +1475,8 @@ fi
 AC_CONFIG_FILES([
 	Makefile
 	libmpg123.pc
-	mpg123.spec
-	doc/Makefile
 	src/Makefile
-	src/output/Makefile
-	src/libmpg123/Makefile
-	src/libmpg123/mpg123.h
+	src/mpg123.h
 ])
 
 AC_OUTPUT
@@ -2431,11 +1494,7 @@ echo "
   Gapless Support ......... $gapless
   Debugging ............... $debugging
   Seek table size ......... $seektable
-  FIFO support ............ $fifo
-  Buffer .................. $buffer
-  Network (http streams) .. $network
-  Network Sockets ......... $network_type
-  IPv6 (getaddrinfo) ...... $ipv6"
+"
 if test x"$LARGEFILE_BITS" = x; then
   echo "  File offsets ............ default"
 else
@@ -2468,22 +1527,10 @@ echo -n "
   Integer conversion ...... $integers
   New/old WRITE_SAMPLE .... $newoldwritesample
   new Huffman scheme ...... $newhuff
-
-Note: Disabling core features is not commonly done and some combinations might not build/work. If you encounter such a case, help yourself (and provide a patch) or just poke the maintainers.
 "
 # just an empty line
 echo
 
-echo "  Modules ................. $modules"
-echo "  Module suffix ........... $with_module_suffix"
-echo "  Checked audio modules ... $check_modules
-  Detected audio support ..$output_modules
-  Default output module ... $default_output_module
-"
-if test x"$modules" = xdisabled; then
-echo "The _single_ active output module is being statically linked in.
-"
-fi
 if test x"$with_optimization" = x0; then
 	echo "No optimization flags chosen, make sure you have something basic in your CFLAGS at least...
 "
