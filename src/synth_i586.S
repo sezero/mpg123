@@ -96,7 +96,7 @@ ASM_NAME(synth_1to1_i586_asm):
 	leal (%ecx,%ebp,4),%eax
 .L74:
 	pushl %eax
-	call ASM_NAME(dct64_i386)
+	call MANGLECALL(dct64_i386)
 	addl $12,%esp
 /* stack now back on track */
 	movl 16(%esp),%edx

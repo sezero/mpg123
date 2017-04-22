@@ -61,7 +61,7 @@ ASM_NAME(synth_1to1_MMX):
 2:
         pushl %edx
         pushl %ecx
-        call ASM_NAME(dct64_MMX)
+        call MANGLECALL(dct64_MMX)
         addl $12,%esp
 /* stack like before, pushed 3, incremented again */
 	leal 1(%ebx), %ecx

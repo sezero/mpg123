@@ -22,6 +22,11 @@ ASM_NAME(dct64_3dnow):
 	pushl %edi
 	pushl %esi
 	pushl %ebx
+
+	#undef _EBX_
+	#define _EBX_ %ecx
+	GET_GOT _EBX_
+
 	leal 16(%esp),%ebx
 	movl 284(%esp),%edi
 	movl 276(%esp),%ebp
@@ -31,7 +36,7 @@ ASM_NAME(dct64_3dnow):
 	/* femms */
 
 	/* 1 */
-	movl ASM_NAME(pnts),%eax
+	movl MANGLE(pnts),%eax
 	movq 0(%edi),%mm0
         movq %mm0,%mm1
 	movd 124(%edi),%mm2
@@ -130,7 +135,7 @@ ASM_NAME(dct64_3dnow):
 	movd %mm5,64(%ebx)
 	
 	/* 2 */
-	movl ASM_NAME(pnts)+4,%eax
+	movl 4+MANGLE(pnts),%eax
 	/* 0,14 */
 	movq 0(%ebx),%mm0
 	movq %mm0,%mm1
@@ -233,7 +238,7 @@ ASM_NAME(dct64_3dnow):
 	movd %mm5,96(%esi)
 
 	/* 3 */
-	movl ASM_NAME(pnts)+8,%eax
+	movl 8+MANGLE(pnts),%eax
 	movq 0(%eax),%mm0
 	movq 8(%eax),%mm1
 	/* 0,6 */
@@ -334,7 +339,7 @@ ASM_NAME(dct64_3dnow):
 	movd %mm6,112(%ebx)
 	
 	/*  4 */
-	movl ASM_NAME(pnts)+12,%eax
+	movl 12+MANGLE(pnts),%eax
 	movq 0(%eax),%mm0
 	/*  0 */
 	movq 0(%ebx),%mm1
@@ -444,7 +449,7 @@ ASM_NAME(dct64_3dnow):
 	pi2fd %mm0,%mm0	
 	movd %eax,%mm1
 	pi2fd %mm1,%mm1
-	movl ASM_NAME(pnts)+16,%eax
+	movl 16+MANGLE(pnts),%eax
 	movd 0(%eax),%mm2
 	/*  1.0 | cos0 */
 	punpckldq %mm2,%mm1

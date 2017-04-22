@@ -13,6 +13,13 @@
 #include "config.h"
 #include "intsym.h"
 
+#if (defined OPT_I486)  || (defined OPT_I586) || (defined OPT_I586_DITHER) \
+ || (defined OPT_MMX)   || (defined OPT_SSE)  || (defined OPT_3DNOW) || (defined OPT_3DNOWEXT) \
+ || (defined OPT_3DNOW_VINTAGE) || (defined OPT_3DNOWEXT_VINTAGE) \
+ || (defined OPT_SSE_VINTAGE)
+#define OPT_X86
+#endif
+
 #ifdef CCALIGN
 #define MOVUAPS movaps
 #else
@@ -68,6 +75,31 @@
 #else
 #define ASM_NAME(a) a
 #define ASM_VALUE(a) MANGLE_MACROCAT($,a)
+#endif
+
+#if defined(OPT_X86) && defined(PIC)
+#define _EBX_	%ebx
+#define MANGLE(a) a ## @GOTOFF(_EBX_)
+#undef ASM_VALUE
+#define ASM_VALUE(a) MANGLE_MACROCAT($,a) ##@GOTOFF
+#define MANGLECALL(a) a ## @PLT
+
+.macro GET_GOT reg=%ebx
+	call 1f
+1\():
+	pop \reg
+2\():
+	addl $_GLOBAL_OFFSET_TABLE_ + (2b-1b), \reg
+.endm
+#define PREPARE_GOT	pushl _EBX_
+#define RESTORE_GOT	popl _EBX_
+#else
+.macro GET_GOT reg
+.endm
+#define PREPARE_GOT
+#define RESTORE_GOT
+#define MANGLE ASM_NAME
+#define MANGLECALL ASM_NAME
 #endif
 
 #if defined(__CYGWIN__) || defined(__MINGW32__) || defined(__APPLE__)

@@ -51,7 +51,12 @@ ASM_NAME(synth_1to1_s32_sse_asm):
 	movl		%esp, %ebp
 	pushl		%ebx
 	pushl		%esi
-	
+
+	#undef _EBX_
+	#define _EBX_ %edi
+	PREPARE_GOT
+	GET_GOT _EBX_
+
 	pxor		MMREG_CLIP, MMREG_CLIP
 	
 	movl		8(%ebp), WINDOW
@@ -141,9 +146,9 @@ ASM_NAME(synth_1to1_s32_sse_asm):
 	
 	movaps		%xmm0, %xmm1
 	movaps		%xmm0, %xmm2
-	mulps		ASM_NAME(scale_s32), %xmm0
-	cmpnleps	ASM_NAME(maxmin_s32), %xmm1
-	cmpltps		ASM_NAME(maxmin_s32)+16, %xmm2
+	mulps		MANGLE(scale_s32), %xmm0
+	cmpnleps	MANGLE(maxmin_s32), %xmm1
+	cmpltps		16+MANGLE(maxmin_s32), %xmm2
 	cvtps2pi	%xmm0, %mm0
 	movhlps		%xmm0, %xmm0
 	cvtps2pi	%xmm0, %mm1
@@ -253,9 +258,9 @@ ASM_NAME(synth_1to1_s32_sse_asm):
 	
 	movaps		%xmm0, %xmm1
 	movaps		%xmm0, %xmm2
-	mulps		ASM_NAME(scale_s32), %xmm0
-	cmpnleps	ASM_NAME(maxmin_s32), %xmm1
-	cmpltps		ASM_NAME(maxmin_s32)+16, %xmm2
+	mulps		MANGLE(scale_s32), %xmm0
+	cmpnleps	MANGLE(maxmin_s32), %xmm1
+	cmpltps		16+MANGLE(maxmin_s32), %xmm2
 	cvtps2pi	%xmm0, %mm0
 	movhlps		%xmm0, %xmm0
 	cvtps2pi	%xmm0, %mm1
@@ -293,7 +298,9 @@ ASM_NAME(synth_1to1_s32_sse_asm):
 	paddw		%mm1, %mm0
 	movd		%mm0, %eax
 	andl		$0xffff, %eax
-	
+
+	RESTORE_GOT
+
 	popl		%esi
 	popl		%ebx
 	movl		%ebp, %esp

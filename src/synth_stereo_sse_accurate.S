@@ -64,6 +64,10 @@ ASM_NAME(synth_1to1_s_sse_accurate_asm):
 	leal		64(WINDOW), WINDOW
 	subl		%eax, WINDOW
 
+	#undef _EBX_
+	#define _EBX_ %eax
+	GET_GOT _EBX_
+
 	movl		$4, %ecx
 	
 	ALIGN16
@@ -229,10 +233,10 @@ ASM_NAME(synth_1to1_s_sse_accurate_asm):
 	movaps		%xmm5, %xmm2
 	movaps		%xmm0, %xmm3
 	movaps		%xmm0, %xmm4
-	cmpnleps	ASM_NAME(maxmin_s16), %xmm1
-	cmpltps		ASM_NAME(maxmin_s16)+16, %xmm2
-	cmpnleps	ASM_NAME(maxmin_s16), %xmm3
-	cmpltps		ASM_NAME(maxmin_s16)+16, %xmm4
+	cmpnleps	MANGLE(maxmin_s16), %xmm1
+	cmpltps		16+MANGLE(maxmin_s16), %xmm2
+	cmpnleps	MANGLE(maxmin_s16), %xmm3
+	cmpltps		16+MANGLE(maxmin_s16), %xmm4
 	cvtps2pi	%xmm5, %mm0
 	cvtps2pi	%xmm0, %mm1
 	movhlps		%xmm5, %xmm5
@@ -441,10 +445,10 @@ ASM_NAME(synth_1to1_s_sse_accurate_asm):
 	movaps		%xmm5, %xmm2
 	movaps		%xmm0, %xmm3
 	movaps		%xmm0, %xmm4
-	cmpnleps	ASM_NAME(maxmin_s16), %xmm1
-	cmpltps		ASM_NAME(maxmin_s16)+16, %xmm2
-	cmpnleps	ASM_NAME(maxmin_s16), %xmm3
-	cmpltps		ASM_NAME(maxmin_s16)+16, %xmm4
+	cmpnleps	MANGLE(maxmin_s16), %xmm1
+	cmpltps		16+MANGLE(maxmin_s16), %xmm2
+	cmpnleps	MANGLE(maxmin_s16), %xmm3
+	cmpltps		16+MANGLE(maxmin_s16), %xmm4
 	cvtps2pi	%xmm5, %mm0
 	cvtps2pi	%xmm0, %mm1
 	movhlps		%xmm5, %xmm5

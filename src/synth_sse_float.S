@@ -39,6 +39,11 @@ ASM_NAME(synth_1to1_real_sse_asm):
 	movl		%esp, %ebp
 	pushl		%ebx
 	pushl		%esi
+
+	#undef _EBX_
+	#define _EBX_ %edi
+	PREPARE_GOT
+	GET_GOT _EBX_
 	
 	movl		8(%ebp), WINDOW
 	movl		12(%ebp), B0
@@ -127,7 +132,7 @@ ASM_NAME(synth_1to1_real_sse_asm):
 	
 	movups		(SAMPLES), %xmm1
 	movups		16(SAMPLES), %xmm2
-	mulps		ASM_NAME(scale_sse), %xmm0
+	mulps		MANGLE(scale_sse), %xmm0
 	shufps		$0xdd, %xmm2, %xmm1
 	movaps		%xmm0, %xmm2
 	unpcklps	%xmm1, %xmm0
@@ -217,7 +222,7 @@ ASM_NAME(synth_1to1_real_sse_asm):
 	
 	movups		(SAMPLES), %xmm1
 	movups		16(SAMPLES), %xmm2
-	mulps		ASM_NAME(scale_sse), %xmm0
+	mulps		MANGLE(scale_sse), %xmm0
 	shufps		$0xdd, %xmm2, %xmm1
 	movaps		%xmm0, %xmm2
 	unpcklps	%xmm1, %xmm0
@@ -230,7 +235,9 @@ ASM_NAME(synth_1to1_real_sse_asm):
 	jnz			1b
 	
 	xorl		%eax, %eax
-	
+
+	RESTORE_GOT
+
 	popl		%esi
 	popl		%ebx
 	movl		%ebp, %esp

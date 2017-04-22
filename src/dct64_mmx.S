@@ -21,6 +21,11 @@ ASM_NAME(dct64_MMX):
 	pushl %esi
 	pushl %edi
 	subl $256,%esp
+
+	#undef _EBX_
+	#define _EBX_ %ebx
+	GET_GOT _EBX_
+
 	movl 280(%esp),%eax
 	flds     (%eax)
 	leal 128(%esp),%edx
@@ -29,7 +34,7 @@ ASM_NAME(dct64_MMX):
 	fstps    (%edx)
 	movl 276(%esp),%edi
 	flds    4(%eax)
-	movl ASM_VALUE(costab_mmxsse),%ebx
+	leal MANGLE(costab_mmxsse),%ebx
 	fadds 120(%eax)
 	orl %ecx,%ecx
 	fstps   4(%edx)

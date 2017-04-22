@@ -46,12 +46,20 @@ ASM_NAME(dct64_3dnowext):
 	pushl	%esi
 	pushl	%ebx
 	subl	$256, %esp
+
+	#undef _EBX_
+	#define _EBX_ %ebx
+	PREPARE_GOT
+	GET_GOT _EBX_
+#if defined(OPT_X86) && defined(PIC)
+	movl	_EBX_, (%esp) /* save PIC register */
+#endif
 /* APP */
 	movl 16(%ebp),%eax
 	leal 128+-268(%ebp),%edx
 	movl 8(%ebp),%esi
 	movl 12(%ebp),%edi
-	movl ASM_VALUE(costab_mmxsse),%ebx
+	leal MANGLE(costab_mmxsse),%ebx
 	leal -268(%ebp),%ecx
 	movq	(%eax), %mm0
 	movq	8(%eax), %mm4
@@ -344,9 +352,13 @@ ASM_NAME(dct64_3dnowext):
 	pswapd	%mm7, %mm7
 	movq	%mm3, 104(%ecx)
 	movq	%mm7, 120(%ecx)
-	movd	plus_1f, %mm6
+#if defined(OPT_X86) && defined(PIC)
+	#define _EBX_ %eax
+	movl	(%esp), _EBX_
+#endif
+	movd	MANGLE(plus_1f), %mm6
 	punpckldq 120(%ebx), %mm6
-	movq	x_plus_minus_3dnow, %mm7
+	movq	MANGLE(x_plus_minus_3dnow), %mm7
 	movq	32(%ecx), %mm0
 	movq	64(%ecx), %mm2
 	movq	%mm0, %mm1
@@ -703,6 +715,7 @@ ASM_NAME(dct64_3dnowext):
 	femms
 	
 /* NO_APP */
+	RESTORE_GOT
 	addl	$256, %esp
 	popl	%ebx
 	popl	%esi
