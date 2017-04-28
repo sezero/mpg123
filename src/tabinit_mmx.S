@@ -111,8 +111,8 @@ ASM_NAME(make_decode_tables_mmx_asm):
 	pushl %edi
 
 	/* save $intwinbase+444 to -24(%ebp) */
-	addl $444,%edi
-	pushl %edi
+	leal 444(%edi),%eax
+	pushl %eax
 
 #define INTWINDIV	-16(%ebp)
 #define INTWINBASE	-20(%ebp)

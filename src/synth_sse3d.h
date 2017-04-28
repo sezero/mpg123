@@ -64,7 +64,7 @@ SYNTH_NAME:
 	#undef _EBX_
 	#define _EBX_ %eax
 	GET_GOT _EBX_
-#define EBXSAVE 32(%ebp)
+#define EBXSAVE -4(%ebp)
 	movl _EBX_, EBXSAVE /* save PIC register */
 #endif
 

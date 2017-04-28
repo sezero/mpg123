@@ -35,7 +35,6 @@
 ASM_NAME(dct36_3dnow):
 	pushl %ebp
 	movl %esp,%ebp
-	subl $120,%esp
 	pushl %esi
 	pushl %ebx
 
@@ -49,7 +48,6 @@ ASM_NAME(dct36_3dnow):
 	movl 16(%ebp),%ecx
 	movl 20(%ebp),%edx
 	movl 24(%ebp),%ebx
-	leal -128(%ebp),%esp
 
 	femms
 	movq (%eax),%mm0
@@ -202,7 +200,7 @@ ASM_NAME(dct36_3dnow):
 	movq %mm3,%mm4
 	pfsub %mm2,%mm4
 	movq %mm7,%mm5
-	punpckldq 0+MANGLE(tfcos36),%mm5
+	punpckldq 32+MANGLE(tfcos36),%mm5
 	pfmul %mm5,%mm4
 	movq %mm4,%mm5
 	pfacc %mm5,%mm5
