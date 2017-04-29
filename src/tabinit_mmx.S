@@ -89,57 +89,52 @@ intwindiv:
 .globl ASM_NAME(make_decode_tables_mmx_asm)
 ASM_NAME(make_decode_tables_mmx_asm):
 	pushl %ebp
-	mov %esp, %ebp
+	mov %esp,%ebp
+	sub $12,%esp
 	pushl %edi
 	pushl %esi
 	pushl %ebx
-/* stack: 0=ebx, 4=esi, 8=edi, 12=ebp, 16=back, 20=scaleval, 24=decwin_mmx, 28=decwins */
-/* ebp:                         0=ebp,  4=back,  8=scaleval, 12=decwin_mmx, 16=decwins */
 
-	#undef _EBX_
-	#define _EBX_ %edi
-	GET_GOT _EBX_
-	movl MANGLE(intwindiv), %ecx
-	/* save MANGLE(intwindiv) to -16(%ebp) */
-	pushl %ecx
+	GET_GOT
+	lea LOCAL_VAR(intwinbase),%edi
+	mov LOCAL_VAR(intwindiv),%ecx
+	mov %edi,-4(%ebp)
+	lea 444(%edi),%eax
+	mov %eax,-8(%ebp)
+	mov %ecx,-12(%ebp)
 
+/* stack: -12(%ebp)=*intwindiv, -8(%ebp)=intwinbase+444, -4(%ebp)=intwinbase, ... ,
+          4(%ebp)=back, 8(%ebp)=scaleval, 12(%ebp)=decwin_mmx, 16(%ebp)=decwins */
+#define INTWINDIV -12(%ebp)
+#define INTWINBASE_PLUS_444 -8(%ebp)
+#define INTWINBASE -4(%ebp)
+#define SCALEVAL 8(%ebp)
+#define DECWIN_MMX 12(%ebp)
+#define DECWINS 16(%ebp)
+	
 	xorl %ecx,%ecx
 	xorl %ebx,%ebx
 	movl $32,%esi
-	leal MANGLE(intwinbase),%edi
-	/* save $intwinbase to -20(%ebp) */
-	pushl %edi
-
-	/* save $intwinbase+444 to -24(%ebp) */
-	leal 444(%edi),%eax
-	pushl %eax
-
-#define INTWINDIV	-16(%ebp)
-#define INTWINBASE	-20(%ebp)
-#define INTWINBASE444	-24(%ebp)
-
-	negl 8(%ebp)	/* scaleval */
+	
+	negl SCALEVAL	/* scaleval */
 	pushl $2	/* intwinbase step */
-/* stack: 20=scaleval 24=decwin_mmx, 28=decwins */
 .L00:
 	cmpl $528,%ecx
 	jnc .L02
 	movswl (%edi),%eax
-	cmpl INTWINBASE444,%edi
+	cmpl INTWINBASE_PLUS_444,%edi
 	jc .L01
 	addl $60000,%eax
 .L01:
 	pushl %eax
-/* stack: 24=scaleval 28=decwin_mmx, 32=decwins */
 	fildl (%esp)
 	fdivs INTWINDIV
-	fimull 8(%ebp) /* scaleval */
+	fimull SCALEVAL /* scaleval */
 /* eax used to be popped the line before... I'll just use it here a bit */
-	movl 12(%ebp),%eax /* decwin_mmx */
+	movl DECWIN_MMX,%eax /* decwin_mmx */
 	fsts    (%eax,%ecx,4)
 	fstps 64(%eax,%ecx,4)
 	popl %eax
-/* stack: 20=scaleval 24=decwin_mmx, 28=decwins */
 .L02:
 	leal -1(%esi),%edx
 	andl %ebx,%edx
@@ -148,7 +143,7 @@ ASM_NAME(make_decode_tables_mmx_asm):
 	addl $-1023,%ecx
 	testl %esi,%ebx
 	jz  .L03
-	negl 8(%ebp)
+	negl SCALEVAL
 .L03:
 	addl %esi,%ecx
 	addl (%esp),%edi
@@ -169,12 +164,12 @@ ASM_NAME(make_decode_tables_mmx_asm):
 	cmpl $528,%ecx
 	jnc .L11
 	movswl (%edi),%eax
-	cmpl INTWINBASE444,%edi
+	cmpl INTWINBASE_PLUS_444,%edi
 	jc .L06
 	addl $60000,%eax
 .L06:
 	cltd
-	imull 8(%ebp)
+	imull SCALEVAL
 	shrdl $17,%edx,%eax
 	cmpl $32767,%eax
 	movl $1055,%edx
@@ -188,8 +183,7 @@ ASM_NAME(make_decode_tables_mmx_asm):
 .L08:
 /* going to use ebx for decwins, watch the jumps */
 	pushl %ebx 
-/* stack: 24=scaleval 28=decwin_mmx, 32=decwins */
-	movl 16(%ebp),%ebx
+	movl DECWINS,%ebx
 	cmpl $512,%ecx
 	jnc .L09
 	subl %ecx,%edx
@@ -211,7 +205,7 @@ ASM_NAME(make_decode_tables_mmx_asm):
 	addl $-1023,%ecx
 	testl %esi,%ebx
 	jz  .L12
-	negl 8(%ebp)
+	negl SCALEVAL
 .L12:
 	addl %esi,%ecx
 	addl (%esp),%edi
@@ -224,13 +218,12 @@ ASM_NAME(make_decode_tables_mmx_asm):
 	jmp .L05
 .L13:
 	popl %eax
-
-	addl $12, %esp
 	
 	popl %ebx
 	popl %esi
 	popl %edi
-	popl %ebp
+	mov %ebp,%esp
+	pop %ebp
 	ret
 
 NONEXEC_STACK

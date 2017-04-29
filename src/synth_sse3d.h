@@ -63,7 +63,7 @@ SYNTH_NAME:
 #ifdef PIC
 	#undef _EBX_
 	#define _EBX_ %eax
-	GET_GOT _EBX_
+	GET_GOT
 #define EBXSAVE -4(%ebp)
 	movl _EBX_, EBXSAVE /* save PIC register */
 #endif
@@ -148,8 +148,8 @@ SYNTH_NAME:
 	packssdw %mm4,%mm4
 	movq	(%edi), %mm1
 	punpckldq %mm4, %mm0
-	pand   MANGLE(one_null), %mm1
-	pand   MANGLE(null_one), %mm0
+	pand   LOCAL_VAR(one_null), %mm1
+	pand   LOCAL_VAR(null_one), %mm0
 	por    %mm0, %mm1
 	movq   %mm1,(%edi)
 	leal 64(%esi),%esi
@@ -228,8 +228,8 @@ SYNTH_NAME:
 	psubsw %mm5,%mm4
 	movq	(%edi), %mm1
 	punpckldq %mm4, %mm0
-	pand   MANGLE(one_null), %mm1
-	pand   MANGLE(null_one), %mm0
+	pand   LOCAL_VAR(one_null), %mm1
+	pand   LOCAL_VAR(null_one), %mm0
 	por    %mm0, %mm1
 	movq   %mm1,(%edi)
 	subl $64,%esi
@@ -263,10 +263,6 @@ SYNTH_NAME:
 	popl	%ebx
 	popl	%esi
 	popl	%edi
-#ifdef PIC
-	addl $8,%esp
-#else
-	addl $4,%esp
-#endif
+	mov		%ebp, %esp
 	popl	%ebp
 	ret

@@ -77,7 +77,7 @@ ASM_NAME(synth_1to1_3dnow_asm):
 #ifdef ACCURATE_ROUNDING
 	#undef _EBX_
 	#define _EBX_ %eax
-	GET_GOT _EBX_
+	GET_GOT
 	/* FIXME */
 #if PIC
 	movl _EBX_, EBXSAVE
@@ -122,7 +122,7 @@ ASM_NAME(synth_1to1_3dnow_asm):
 	leal 1088(,%eax,4),%eax
 	addl %ebx,%eax
 	pushl %eax
-	call MANGLECALL(dct64_3dnow)
+	call FUNC(dct64_3dnow)
 	addl $12,%esp
 	jmp .L29
 .L28:
@@ -136,7 +136,7 @@ ASM_NAME(synth_1to1_3dnow_asm):
 	sall $2,%esi
 	leal (%ecx,%edx,4),%eax
 	pushl %eax
-	call MANGLECALL(dct64_3dnow)
+	call FUNC(dct64_3dnow)
 	addl $12,%esp
 	movl %esi,LOCAL1
 .L29:
@@ -193,9 +193,9 @@ ASM_NAME(synth_1to1_3dnow_asm):
 	pfsub %mm3,%mm2
 	incl %ebp
 #ifdef ACCURATE_ROUNDING
-	pfmin MANGLE(max_s16),%mm2
-	pfmax MANGLE(min_s16),%mm2
-	pfadd MANGLE(ftoi_magic),%mm2
+	pfmin LOCAL_VAR(max_s16),%mm2
+	pfmax LOCAL_VAR(min_s16),%mm2
+	pfadd LOCAL_VAR(ftoi_magic),%mm2
 #else
 	pf2id %mm2,%mm2
 	packssdw %mm2,%mm2
@@ -234,9 +234,9 @@ ASM_NAME(synth_1to1_3dnow_asm):
 	pfadd %mm1,%mm0
 	pfacc %mm1,%mm0
 #ifdef ACCURATE_ROUNDING
-	pfmin MANGLE(max_s16),%mm0
-	pfmax MANGLE(min_s16),%mm0
-	pfadd MANGLE(ftoi_magic),%mm0
+	pfmin LOCAL_VAR(max_s16),%mm0
+	pfmax LOCAL_VAR(min_s16),%mm0
+	pfadd LOCAL_VAR(ftoi_magic),%mm0
 #else
 	pf2id %mm0,%mm0
 	packssdw %mm0,%mm0
@@ -313,9 +313,9 @@ ASM_NAME(synth_1to1_3dnow_asm):
 	incl %ebp
 	pxor %mm7,%mm3
 #ifdef ACCURATE_ROUNDING
-	pfmin MANGLE(max_s16),%mm3
-	pfmax MANGLE(min_s16),%mm3
-	pfadd MANGLE(ftoi_magic),%mm3
+	pfmin LOCAL_VAR(max_s16),%mm3
+	pfmax LOCAL_VAR(min_s16),%mm3
+	pfadd LOCAL_VAR(ftoi_magic),%mm3
 #else
 	pf2id %mm3,%mm3
 	packssdw %mm3,%mm3
@@ -334,5 +334,12 @@ ASM_NAME(synth_1to1_3dnow_asm):
 	popl %ebp
 	addl $24,%esp
 	ret
+
+#if defined(PIC) && defined(__APPLE__)
+	.section __IMPORT,__jump_table,symbol_stubs,self_modifying_code+pure_instructions,5
+L_dct64_3dnow:
+	.indirect_symbol ASM_NAME(dct64_3dnow)
+	hlt ; hlt ; hlt ; hlt ; hlt
+#endif
 
 NONEXEC_STACK

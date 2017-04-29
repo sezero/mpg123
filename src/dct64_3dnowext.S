@@ -45,12 +45,9 @@ ASM_NAME(dct64_3dnowext):
 	pushl	%edi
 	pushl	%esi
 	pushl	%ebx
-	subl	$256, %esp
+	subl	$260, %esp
 
-	#undef _EBX_
-	#define _EBX_ %ebx
-	PREPARE_GOT
-	GET_GOT _EBX_
+	GET_GOT
 #if defined(OPT_X86) && defined(PIC)
 	movl	_EBX_, (%esp) /* save PIC register */
 #endif
@@ -59,7 +56,11 @@ ASM_NAME(dct64_3dnowext):
 	leal 128+-268(%ebp),%edx
 	movl 8(%ebp),%esi
 	movl 12(%ebp),%edi
-	leal MANGLE(costab_mmxsse),%ebx
+#if defined(PIC) && defined(__APPLE__)
+	movl GLOBAL_VAR_PTR(costab_mmxsse),%ebx
+#else
+	leal GLOBAL_VAR(costab_mmxsse),%ebx
+#endif
 	leal -268(%ebp),%ecx
 	movq	(%eax), %mm0
 	movq	8(%eax), %mm4
@@ -353,12 +354,13 @@ ASM_NAME(dct64_3dnowext):
 	movq	%mm3, 104(%ecx)
 	movq	%mm7, 120(%ecx)
 #if defined(OPT_X86) && defined(PIC)
+	#undef _EBX_
 	#define _EBX_ %eax
 	movl	(%esp), _EBX_
 #endif
-	movd	MANGLE(plus_1f), %mm6
+	movd	LOCAL_VAR(plus_1f), %mm6
 	punpckldq 120(%ebx), %mm6
-	movq	MANGLE(x_plus_minus_3dnow), %mm7
+	movq	LOCAL_VAR(x_plus_minus_3dnow), %mm7
 	movq	32(%ecx), %mm0
 	movq	64(%ecx), %mm2
 	movq	%mm0, %mm1
@@ -715,13 +717,19 @@ ASM_NAME(dct64_3dnowext):
 	femms
 	
 /* NO_APP */
-	RESTORE_GOT
-	addl	$256, %esp
+	addl	$260, %esp
 	popl	%ebx
 	popl	%esi
 	popl	%edi
 	leave
 	ret
 	/* .size	ASM_NAME(dct64_3dnowext), .-ASM_NAME(dct64_3dnowext) */
+
+#if defined(PIC) && defined(__APPLE__)
+	.section	__IMPORT,__pointers,non_lazy_symbol_pointers
+L_costab_mmxsse:
+	.indirect_symbol	ASM_NAME(costab_mmxsse)
+	.long	0
+#endif
 
 NONEXEC_STACK

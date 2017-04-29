@@ -30,7 +30,7 @@
 	.data
 #endif
 	ALIGN32
-ASM_NAME(scale_sse):
+scale_sse:
 	.long   939524096
 	.long   939524096
 	.long   939524096
@@ -59,7 +59,7 @@ ASM_NAME(synth_1to1_real_s_sse_asm):
 
 	#undef _EBX_
 	#define _EBX_ %eax
-	GET_GOT _EBX_
+	GET_GOT
 
 	movl		$4, %ecx
 	
@@ -222,8 +222,8 @@ ASM_NAME(synth_1to1_real_s_sse_asm):
 	subps		%xmm1, %xmm0
 	addps		%xmm4, %xmm0
 	
-	mulps		MANGLE(scale_sse), %xmm5
-	mulps		MANGLE(scale_sse), %xmm0
+	mulps		LOCAL_VAR(scale_sse), %xmm5
+	mulps		LOCAL_VAR(scale_sse), %xmm0
 	movaps		%xmm5, %xmm1
 	unpcklps	%xmm0, %xmm5
 	unpckhps	%xmm0, %xmm1
@@ -395,8 +395,8 @@ ASM_NAME(synth_1to1_real_s_sse_asm):
 	addps		%xmm1, %xmm0
 	addps		%xmm4, %xmm0
 	
-	mulps		MANGLE(scale_sse), %xmm5
-	mulps		MANGLE(scale_sse), %xmm0
+	mulps		LOCAL_VAR(scale_sse), %xmm5
+	mulps		LOCAL_VAR(scale_sse), %xmm0
 	movaps		%xmm5, %xmm1
 	unpcklps	%xmm0, %xmm5
 	unpckhps	%xmm0, %xmm1

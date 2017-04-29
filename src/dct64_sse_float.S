@@ -45,12 +45,8 @@ ASM_NAME(dct64_real_sse):
 	subl		$128, %esp /* reserve space for temporal store */
 	pushl		%ebx
 
-	#undef _EBX_
-	#define _EBX_ %edx
-	GET_GOT _EBX_
+	GET_GOT
 	
-	movl		ARG(0), %ecx
-	movl		ARG(1), %ebx
 	movl		ARG(2), %eax
 	
 	MOVUAPS 	(%eax), %xmm7
@@ -81,7 +77,11 @@ ASM_NAME(dct64_real_sse):
 	subps 		%xmm0, %xmm5
 	subps 		%xmm1, %xmm4
 	
-	leal		MANGLE(costab_mmxsse), %eax
+#if defined(PIC) && defined(__APPLE__)
+	mov			GLOBAL_VAR_PTR(costab_mmxsse), %eax
+#else
+	lea			GLOBAL_VAR(costab_mmxsse), %eax
+#endif
 	mulps		(%eax), %xmm7
 	mulps		16(%eax), %xmm6
 	mulps		32(%eax), %xmm5
@@ -193,7 +193,7 @@ ASM_NAME(dct64_real_sse):
 	
 	movss		120(%eax), %xmm5
 	shufps		$0x00, %xmm5, %xmm5
-	xorps		MANGLE(pnpn), %xmm5
+	xorps		LOCAL_VAR(pnpn), %xmm5
 	
 	movaps		%xmm4, %xmm0
 	movaps		%xmm6, %xmm1
@@ -299,7 +299,7 @@ ASM_NAME(dct64_real_sse):
 	shufps		$0x1e, %xmm2, %xmm2
 	shufps		$0x1e, %xmm4, %xmm4
 	shufps		$0x1e, %xmm6, %xmm6
-	leal		MANGLE(mask), %eax
+	lea			LOCAL_VAR(mask), %eax
 	andps		(%eax), %xmm0
 	andps		(%eax), %xmm2
 	andps		(%eax), %xmm4
@@ -324,6 +324,9 @@ ASM_NAME(dct64_real_sse):
 	
 	movaps		TEMP_BYTE(0), %xmm0
 	movaps		TEMP_BYTE(64), %xmm4
+	
+	movl		ARG(0), %ecx
+	movl		ARG(1), %ebx
 	
 	movss		%xmm0, 1024(%ecx)
 	movss		%xmm2, 896(%ecx)
@@ -403,5 +406,12 @@ ASM_NAME(dct64_real_sse):
 	movl		%ebp, %esp
 	popl		%ebp
 	ret
+
+#if defined(PIC) && defined(__APPLE__)
+	.section	__IMPORT,__pointers,non_lazy_symbol_pointers
+L_costab_mmxsse:
+	.indirect_symbol	ASM_NAME(costab_mmxsse)
+	.long	0
+#endif
 
 NONEXEC_STACK

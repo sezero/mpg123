@@ -26,7 +26,7 @@
 	.data
 #endif
 	ALIGN32
-ASM_NAME(scale_sse):
+scale_sse:
 	.long   939524096
 	.long   939524096
 	.long   939524096
@@ -39,11 +39,6 @@ ASM_NAME(synth_1to1_real_sse_asm):
 	movl		%esp, %ebp
 	pushl		%ebx
 	pushl		%esi
-
-	#undef _EBX_
-	#define _EBX_ %edi
-	PREPARE_GOT
-	GET_GOT _EBX_
 	
 	movl		8(%ebp), WINDOW
 	movl		12(%ebp), B0
@@ -53,6 +48,10 @@ ASM_NAME(synth_1to1_real_sse_asm):
 	
 	leal		64(WINDOW), WINDOW
 	subl		%eax, WINDOW
+	
+	#undef _EBX_
+	#define _EBX_ %eax
+	GET_GOT
 
 	movl		$4, %ecx
 	
@@ -132,7 +131,7 @@ ASM_NAME(synth_1to1_real_sse_asm):
 	
 	movups		(SAMPLES), %xmm1
 	movups		16(SAMPLES), %xmm2
-	mulps		MANGLE(scale_sse), %xmm0
+	mulps		LOCAL_VAR(scale_sse), %xmm0
 	shufps		$0xdd, %xmm2, %xmm1
 	movaps		%xmm0, %xmm2
 	unpcklps	%xmm1, %xmm0
@@ -222,7 +221,7 @@ ASM_NAME(synth_1to1_real_sse_asm):
 	
 	movups		(SAMPLES), %xmm1
 	movups		16(SAMPLES), %xmm2
-	mulps		MANGLE(scale_sse), %xmm0
+	mulps		LOCAL_VAR(scale_sse), %xmm0
 	shufps		$0xdd, %xmm2, %xmm1
 	movaps		%xmm0, %xmm2
 	unpcklps	%xmm1, %xmm0
@@ -235,8 +234,6 @@ ASM_NAME(synth_1to1_real_sse_asm):
 	jnz			1b
 	
 	xorl		%eax, %eax
-
-	RESTORE_GOT
 
 	popl		%esi
 	popl		%ebx
