@@ -495,7 +495,7 @@ case $host in
   *-*-linux*|*-*-kfreebsd*-gnu)
     cpu_type="generic_fpu"
   ;;
-  i386-apple-darwin10*)
+  i?86-apple-darwin10*)
     AC_MSG_CHECKING([if CPU type supports x86-64])
     case `sysctl -n hw.optional.x86_64` in
       1)
@@ -509,7 +509,7 @@ case $host in
       ;;
     esac
   ;;
-  i386-apple-darwin*)
+  i?86-apple-darwin*)
     cpu_type="x86"
     newoldwritesample=enabled
   ;;
