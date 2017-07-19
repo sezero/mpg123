@@ -86,7 +86,8 @@ int attribute_align_arg mpg123_copy_string(mpg123_string* from, mpg123_string* t
 
 	if(mpg123_resize_string(to, fill))
 	{
-		memcpy(to->p, text, fill);
+		if(fill) /* Avoid memcpy(NULL, NULL, 0) */
+			memcpy(to->p, text, fill);
 		to->fill = fill;
 		return 1;
 	}
