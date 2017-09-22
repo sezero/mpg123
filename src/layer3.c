@@ -467,8 +467,14 @@ static int III_get_side_info(mpg123_handle *fr, struct III_sideinfo *si,int ster
 		}
 		gr_info->pow2gain = fr->gainpow2+256 - getbits_fast(fr, 8) + powdiff;
 		if(ms_stereo) gr_info->pow2gain += 2;
-
 		gr_info->scalefac_compress = getbits(fr, tab[4]);
+		if(gr_info->part2_3_length == 0)
+		{
+			if(gr_info->scalefac_compress > 0)
+				debug1( "scalefac_compress _should_ be zero instead of %i"
+				,	gr_info->scalefac_compress );
+			gr_info->scalefac_compress = 0;
+		}
 
 		if(get1bit(fr))
 		{ /* window switch flag  */
@@ -1226,10 +1232,10 @@ static int III_dequantize_sample(mpg123_handle *fr, real xr[SBLIMIT][SSLIMIT],in
 	{
 		part2remain = 0;
 		/* Not entirely sure what good values are, must be > 0. */
-		gr_info->maxband[0] = 1;
-		gr_info->maxband[1] = 1;
-		gr_info->maxband[2] = 1;
-		gr_info->maxbandl   = 1;
+		gr_info->maxband[0] =
+		gr_info->maxband[1] =
+		gr_info->maxband[2] =
+		gr_info->maxbandl   = 0;
 		gr_info->maxb       = 1;
 	}
 
