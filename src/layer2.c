@@ -15,6 +15,7 @@
 #include "l2tables.h"
 #endif
 #include "getbits.h"
+#include "debug.h"
 
 #ifndef NO_LAYER12 /* Stuff  needed for layer I and II. */
 
@@ -343,7 +344,7 @@ int do_layer2(mpg123_handle *fr)
 
 	if(fr->jsbound > fr->II_sblimit)
 	{
-		fprintf(stderr, "Truncating stereo boundary to sideband limit.\n");
+		if(NOQUIET) fprintf(stderr, "Truncating stereo boundary to sideband limit.\n");
 		fr->jsbound=fr->II_sblimit;
 	}
 
