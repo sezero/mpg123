@@ -939,7 +939,8 @@ int parse_new_id3(mpg123_handle *fr, unsigned long first4bytes)
 										{
 											pos += strlen((char*) realdata) + 1;
 											// channel and two bytes for RVA value
-											if(realsize-pos < 3)
+											// pos possibly just past the safety zero, so one more than realsize
+											if(pos > realsize || realsize-pos < 3)
 											{
 												if(NOQUIET)
 													error("bad RVA2 tag (truncated?)");
