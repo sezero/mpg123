@@ -20,6 +20,7 @@ AC_SUBST(API_VERSION)
 AC_CONFIG_SRCDIR(src/libmpg123.c)
 AC_CONFIG_AUX_DIR(build)
 AC_CONFIG_MACRO_DIR([m4])
+AM_MAINTAINER_MODE
 AC_CANONICAL_HOST
 
 dnl Version 1.7 of automake is recommended
@@ -421,7 +422,7 @@ AC_ARG_ENABLE(equalizer,
                 fi
               ], [])
 
-			  
+
 AC_ARG_WITH([cpu], [
   --with-cpu=generic[[_fpu]]      Use generic processor code with floating point arithmetic
   --with-cpu=generic_float      Plain alias to generic_fpu now... float output is a normal runtime option!
