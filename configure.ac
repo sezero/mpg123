@@ -1362,19 +1362,19 @@ fi
 case $with_optimization in
   0)
     # No Optimizations
-    CFLAGS="$CFLAGS"
+    CFLAGS="-g -fno-common $CFLAGS"
   ;;
   1)
-    CFLAGS="-O $CFLAGS"
+    CFLAGS="-O -fno-common $CFLAGS"
   ;;
   2)
-    CFLAGS="-O2 -fomit-frame-pointer -funroll-all-loops -finline-functions -ffast-math $CFLAGS"
+    CFLAGS="-O2 -fomit-frame-pointer -ffast-math -fno-common $CFLAGS"
   ;;
   3)
-    CFLAGS="-O3 -fomit-frame-pointer -funroll-all-loops -finline-functions -ffast-math $CFLAGS"
+    CFLAGS="-O3 -fomit-frame-pointer -funroll-all-loops -finline-functions -ffast-math -fno-common $CFLAGS"
   ;;
   4)
-    CFLAGS="-O4 -fomit-frame-pointer -funroll-all-loops -finline-functions -ffast-math $CFLAGS"
+    CFLAGS="-O4 -fomit-frame-pointer -funroll-all-loops -finline-functions -ffast-math -fno-common $CFLAGS"
   ;;
   *)
   	AC_MSG_ERROR([Unknown optimizations level '$with_optimization'])
