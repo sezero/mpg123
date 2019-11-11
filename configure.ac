@@ -158,8 +158,9 @@ fi
 
 dnl Configure libtool
 
+#LT_INIT([win32-dll])
 AC_LIBTOOL_WIN32_DLL
-AM_PROG_LIBTOOL
+AC_PROG_LIBTOOL
 
 if test x"$modules" = xdisabled
 then
