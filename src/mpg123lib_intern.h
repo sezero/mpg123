@@ -19,7 +19,7 @@
 #include "abi_align.h"
 
 /* export DLL symbols */
-#if defined(WIN32) && defined(DYNAMIC_BUILD)
+#if (defined(_WIN32) || defined(__OS2__)) && defined(DYNAMIC_BUILD)
 #define BUILD_MPG123_DLL
 #endif
 #include "compat.h"
@@ -316,6 +316,9 @@ void postprocess_buffer(mpg123_handle *fr);
 #if defined (NETWORK) && !defined (WANT_WIN32_SOCKETS)
 /* Does not work with win32 */
 #define TIMEOUT_READ
+#endif
+#if defined(__OS2__) && !defined(__EMX__)
+#undef  TIMEOUT_READ
 #endif
 
 #endif

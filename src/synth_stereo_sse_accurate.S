@@ -25,7 +25,7 @@
 	return value: number of clipped samples
 */
 
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(__EMX__)
 	.section	.rodata
 #else
 	.data

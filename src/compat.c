@@ -12,7 +12,7 @@
 #include "config.h"
 #include "compat.h"
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__WATCOMC__)
 #include <io.h>
 #else
 #include <fcntl.h>
@@ -71,8 +71,10 @@ int compat_open(const char *filename, int flags)
 fallback:
 #endif
 
-#if (defined(WIN32) && !defined (__CYGWIN__)) /* MSDN says POSIX function is deprecated beginning in Visual C++ 2005 */
+#if defined(_WIN32) && !defined(__CYGWIN__) /* MSDN says POSIX function is deprecated beginning in Visual C++ 2005 */
 	ret = _open(filename, flags); /* Try plain old _open(), if it fails, do nothing */
+#elif defined(__WATCOMC__)
+	ret = open(filename, flags);
 #else
 	/* On UNIX, we always add a default permission mask in case flags|O_CREAT. */
 	ret = open(filename, flags, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);

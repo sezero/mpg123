@@ -184,6 +184,11 @@ int win32_utf8_wide(const char *const mbptr, wchar_t **wptr, size_t *buflen);
 typedef int socklen_t;
 #endif
 
+#if defined(_MSC_VER) || (defined(__EMX__) && !(defined(__INNOTEK_LIBC__)||defined(__KLIBC__)))
+#define strcasecmp stricmp
+#define strncasecmp strnicmp
+#endif
+
 /* OSX SDK defines an enum with "normal" as value. That clashes with
    optimize.h */
 #ifdef __APPLE__

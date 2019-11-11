@@ -13,9 +13,10 @@
 
 #include "mangle.h"
 
-.data
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(__EMX__)
 		.section	.rodata
+#else
+.data
 #endif
 	ALIGN8
 .LC0:
