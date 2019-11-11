@@ -88,7 +88,7 @@ open_ok:
 
 int compat_close(int infd)
 {
-#if (defined(WIN32) && !defined (__CYGWIN__)) /* MSDN says POSIX function is deprecated beginning in Visual C++ 2005 */
+#if (defined(_WIN32) && !defined (__CYGWIN__)) /* MSDN says POSIX function is deprecated beginning in Visual C++ 2005 */
 	return _close(infd);
 #else
 	return close(infd);
