@@ -333,10 +333,22 @@ AC_ARG_ENABLE(messages,
                 fi
               ], [])
 
-if test "x$messages" = "xdisabled"; then
+allquiet=disabled
+AC_ARG_ENABLE(allquiet,
+              [  --enable-allquiet=[no/yes] no messages on the console from library (implies --disable-messages) ],
+              [
+                if test "x$enableval" = xyes; then
+                  allquiet="enabled"
+                fi
+              ], [])
+
+if test "x$messages" = "xdisabled" -o "x$allquiet" = "xenabled"; then
   AC_DEFINE(NO_WARNING, 1, [ Define to disable warning messages. ])
   AC_DEFINE(NO_ERRORMSG,   1, [ Define to disable error messages. ])
   AC_DEFINE(NO_ERETURN, 1, [ Define to disable error messages in combination with a return value (the return is left intact). ])
+fi
+if test "x$allquiet" = "xenabled"; then
+  AC_DEFINE(LIBMPG123_QUIET, 1, [ Define to disable all messages from library. ])
 fi
 
 newhuff=enabled

@@ -287,12 +287,21 @@ static inline int32_t scale_rounded(int32_t x, int shift)
 #include "frame.h"
 
 /* fr is a mpg123_handle* by convention here... */
+#if !defined(LIBMPG123_QUIET) || defined(DEBUG)
 #define NOQUIET  (!(fr->p.flags & MPG123_QUIET))
 #define VERBOSE  (NOQUIET && fr->p.verbose)
 #define VERBOSE2 (NOQUIET && fr->p.verbose > 1)
 #define VERBOSE3 (NOQUIET && fr->p.verbose > 2)
 #define VERBOSE4 (NOQUIET && fr->p.verbose > 3)
 #define PVERB(mp, level) (!((mp)->flags & MPG123_QUIET) && (mp)->verbose >= (level))
+#else
+#define NOQUIET 0
+#define VERBOSE 0
+#define VERBOSE2 0
+#define VERBOSE3 0
+#define VERBOSE4 0
+#define PVERB(mp, level) 0
+#endif
 
 int decode_update(mpg123_handle *mh);
 /* residing in format.c  */

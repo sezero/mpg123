@@ -346,6 +346,7 @@ static unsigned char *next_text(unsigned char* prev, unsigned char encoding, siz
 	return text;
 }
 
+#if !defined(LIBMPG123_QUIET) || defined(DEBUG)
 static const char *enc_name(unsigned char enc)
 {
 	switch(enc)
@@ -357,6 +358,7 @@ static const char *enc_name(unsigned char enc)
 		default: return "unknown!";
 	}
 }
+#endif
 
 static void process_text(mpg123_handle *fr, unsigned char *realdata, size_t realsize, char *id)
 {

@@ -169,3 +169,14 @@
 #define ereturn14(rv, s, a, b, c, d, e, f, g, h, i, j, k, l, m, n) return rv
 #define ereturn15(rv, s, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) return rv
 #endif
+
+#if defined(LIBMPG123_QUIET) && !defined(DEBUG) /* kill all fprintf() */
+#if defined (__GNUC__) && !(defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L)
+#define fprintf(x,fmt,args...)		do {} while (0)
+#elif defined(_MSC_VER) && (_MSC_VER < 1400)
+static __inline nop_fprintf(FILE *stream_, const char *format_, ...) { }
+#define fprintf				nop_fprintf
+#else
+#define fprintf(x,...)			do {} while (0)
+#endif
+#endif
