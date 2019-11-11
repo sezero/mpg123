@@ -1,3 +1,11 @@
+1.22.x-sezero (changes made by sezero)
+---
+- Added nasm versions of x86 asm sources.
+- Open Watcom and MSVC6 compatibility.
+- New --enable-allquiet option to completely silence the library.
+- Minor warning fixes.
+- Minor updates to CFLAGS. Updates to configury.
+
 1.22.x-sezero (backports)
 ---
 - Reset the flag for having a frame to decode before trying to
