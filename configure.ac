@@ -713,6 +713,9 @@ fi
 
 if test "x$equalizer" = "xdisabled"; then
   AC_DEFINE(NO_EQUALIZER, 1, [ Define to disable equalizer. ])
+else
+  DECODER_OBJ="$DECODER_OBJ equalizer.\$(OBJEXT)"
+  DECODER_LOBJ="$DECODER_LOBJ equalizer.lo"
 fi
 
 layer1=enabled
@@ -1054,7 +1057,10 @@ s_i386="dct64_i386"
 s_i486="$s_i386 synth_i486 dct64_i486"
 s_i586="$s_i386 synth_i586"
 s_i586d="$s_i386 synth_i586_dither"
-s_3dnow="$s_i386 synth_3dnow dct64_3dnow equalizer_3dnow"
+s_3dnow="$s_i386 synth_3dnow dct64_3dnow"
+if test "x$equalizer" = "xenabled"; then
+  s_3dnow="$s_3dnow equalizer_3dnow"
+fi
 s_3dnowext="$s_i386 dct64_3dnowext tabinit_mmx synth_3dnowext"
 s_3dnow_vintage=$s_3dnow
 s_3dnowext_vintage=$s_3dnowext

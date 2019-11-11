@@ -50,7 +50,6 @@ libmpg123_la_SOURCES = \
 	synth_ntom.h \
 	synth_8bit.h \
 	synths.h \
-	equalizer.c \
 	huffman.h \
 	newhuffman.h \
 	icy.h \
@@ -77,6 +76,7 @@ EXTRA_libmpg123_la_SOURCES = \
 	lfs_wrap.c \
 	icy.c \
 	icy2utf8.c \
+	equalizer.c \
 	l2tables.h \
 	layer1.c \
 	layer2.c \
