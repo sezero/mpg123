@@ -1,3 +1,83 @@
+1.22.x-sezero (backports)
+---
+- Reset the flag for having a frame to decode before trying to
+  parse a new one. This prevents very unkind behaviour (crashes)
+  when combinging mpg123_scan() with decoding later on for damaged
+  streams that have a mixture of different MPEG versions.
+- Fix an out-of-bounds read of maximal two bytes for truncated RVA2 frames
+  (oss-fuzz-bug 15975). The earlier fix around the same location needed
+  one thought more. Actually, another though was needed, oss-fuzz-bug 16009
+  documents the incomplete fix.
+- Fix an invalid write of one zero byte for empty ID3v2 frames that demand
+  de-unsyncing (oss-fuzz-bug 16050).
+- Fix out-of-bounds reads in ID3 parser for unsynced frames.
+  (oss-fuzz-bug 15852)
+- Fix out-of-bounds read for RVA2 frames with non-delimited identifier.
+  (oss-fuzz-bug 15852)
+- Fix implementation-defined parsing of RVA2 values. (oss-fuzz-bug 15862)
+- Correct preprocessor syntax in mangle.h, no #error in a #define line.
+  (bug 273, thanks to nmlgc).
+- Fix compute_bpf() for free format streams (needed to estimate track
+  length and working fuzzy seeking in absence of an Info tag).
+- Accept changing mode extension bits when looking for next header for
+  detecting free-format streams (bug 257).
+- Proper fix for the xrpnt overflow problems by correctly
+  initialising certain tables for MPEG 2.x layer III. The checks that
+  catch the resulting overflow are still in place, but likely superfluous
+  now. Note that this means certain valid files would have been misdecoded
+  before, if anyone actually produced them. Thanks to Robert Hegemann for
+  the fix!
+- Silently handle granules with part2_3_length == 0, but
+  scalefac_compress != 0 (ignore the latter).
+- Hotfix for bug 255: Overflow reading frame data bits in layer II decoding.
+  Now, all-zero data is returned if the frame data is exhausted. This might
+  have a slight impact on performance, but not easily measurable so far.
+- Avoid another buffer read overflow in the ID3 parser on 32 bit platforms
+  (bug 254).
+- Better configure checks for i?86-apple-darwin (bug 253).
+- Prevent harmless call to memcpy(NULL, NULL, 0).
+- More early checking of ID3v2 encoding values to avoid bogus text being
+  stored.
+- Better checks for xrpnt overflow in III_dequantize_sample() before each
+  use, avoiding false positives and catching cases that were rendered
+  harmless by alignment-enlarged buffers.
+- Extend pow tables for layer III to properly handle files with i-stereo and
+  5-bit scalefactors. Never observed them for real, just as fuzzed input to
+  trigger the read overflow. Note: This one goes on record as CVE-2017-11126,
+  calling remote denial of service. While the accesses are out of bounds for
+  the pow tables, they still are safely within libmpg123's memory (other
+  static tables). Just wrong values are used for computation, no actual crash
+  unless you use something like GCC's AddressSanitizer, nor any information
+  disclosure.
+- Avoid left-shifts of negative integers in layer I decoding.
+- Fix undefined shifts on signed long mask in layer3.c (worked in practice,
+  never right in theory). Code might be a bit faster now, even.
+  Thanks to Agostino Sarubbo for reporting.
+- Avoid a mostly harmless conditional jump depending on uninitialised
+  fr->lay in compute_bpf() (mpg123_position()) when track is not ready yet.
+- Fix bug 252, invalid read of size 1 in ID3v2 parser due to forgotten
+  offset from the frame flag bytes (unnoticed in practice for a long
+  time). Fuzzers are in the house again. This one got CVE-2017-10683.
+- Avoid memset(NULL, 0, 0) to calm down the paranoid.
+- Fix return value overflow check for MPG123_BUFFERFILL.
+- Finally provide position-independent code for x86 with assembly optimisations.
+  The textrels are gone thanks to Won Kyu Park.
+- Clarify some license language in files descending from the original MMX
+  optimisation.
+- Use of the i486 decoder is now discouraged more prominently, in configure
+  output.
+- Fix long-standing bad memory read (via integer underflow) in ID3 parser
+  for crafted ID3v2 tags with tiny size information (bug 240). Thanks to
+  Han Lee & Jerold Hoong for the detailed report.
+- Build fix for MSVC (consistent definition of ssize_t, spotted by manx,
+  bug 243)
+- Build fix for --with-cpu=ppc_nofpu (thanks to Michael Kostylev, bug 244).
+- Equalizer optional now (--disable-equalizer) to save precious memory
+- Remove spurious Frankenstein warning when scanning files that have no
+  gapless info (the reported value of -1152 gapless sample length should be
+  a giveaway anyway).
+- Silently skip APE tags (thanks to Hans de Goede).
+
 1.22.4
 ---
 - Fix stupid regression introduced with a bugfix in 1.14.1 to make
