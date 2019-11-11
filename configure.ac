@@ -991,7 +991,6 @@ AC_SUBST(INCLUDE_SYS_TYPE_H)
 
 # Checks for maths libraries.
 AC_CHECK_LIB([m], [sqrt])
-AC_CHECK_LIB([mx], [powf])
 
 # attempt to make the signal stuff work... also with GENERIC - later
 #if test x"$ac_cv_header_sys_signal_h" = xyes; then
