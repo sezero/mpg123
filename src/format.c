@@ -557,10 +557,11 @@ static void conv_s32_to_u32(struct outbuffer *buf)
 /* We always assume that whole numbers are written!
    partials will be cut out. */
 
-static const char *bufsizeerr = "Fatal: Buffer too small for postprocessing!";
-
-
 #ifndef NO_16BIT
+
+#if !defined(NO_ERRORMSG) && !(defined(NO_REAL) && defined(NO_32BIT))
+static const char *bufsizeerr = "Fatal: Buffer too small for postprocessing!";
+#endif
 
 static void conv_s16_to_u16(struct outbuffer *buf)
 {
