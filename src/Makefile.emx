@@ -1,0 +1,51 @@
+## THE RESULTING LIBRARY IS BROKEN ##
+
+# Makefile for OS/2 using EMX/GCC
+# make -f Makefile.emx
+# - builds the static library mpg123.a
+
+CC=gcc
+AR=ar
+RANLIB=ranlib
+AS=nasm
+
+CPPFLAGS = -DREAL_IS_FLOAT -DNEWOLD_WRITE_SAMPLE -DOPT_MULTI -DOPT_GENERIC -DOPT_GENERIC_DITHER -DOPT_I386 -DOPT_I586 -DOPT_I586_DITHER -DOPT_MMX -DOPT_3DNOW -DOPT_3DNOW_VINTAGE -DOPT_3DNOWEXT -DOPT_3DNOWEXT_VINTAGE -DOPT_SSE -DOPT_SSE_VINTAGE
+CPPFLAGS+= -DHAVE_CONFIG_H
+INCLUDES = -IOS2_MSVC/emx -IOS2_MSVC -I.
+ASFLAGS  = -faout -Iasm_nasm/
+ASFLAGS += -DUNDERSCORE
+#need gcc >= 3, and possibly binutils >= 2.11.2, at C-side for CCALIGN
+ASFLAGS += -DCCALIGN
+
+CFLAGS = -Zmt -O2 -Wall -ffast-math
+
+LIBNAME=mpg123.a
+
+COMPILE=$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES)
+
+OBJ=compat.o parse.o frame.o format.o dct64.o id3.o optimize.o readers.o tabinit.o libmpg123.o index.o
+OBJ+= feature.o
+OBJ+= stringbuf.o ntom.o synth.o synth_8bit.o synth_s32.o synth_real.o
+OBJ+= layer1.o layer2.o layer3.o dither.o
+#OBJ+= icy.o icy2utf8.o
+#OBJ+= equalizer.o equalizer_3dnow.o
+OBJ+= getcpuflags.o
+OBJ+= dct64_i386.o synth_i586.o synth_i586_dither.o
+OBJ+= dct64_mmx.o tabinit_mmx.o synth_mmx.o
+OBJ+= synth_3dnow.o dct64_3dnow.o dct36_3dnow.o
+OBJ+= dct64_3dnowext.o synth_3dnowext.o dct36_3dnowext.o
+OBJ+= dct64_sse_float.o synth_sse_float.o synth_stereo_sse_float.o synth_sse_s32.o synth_stereo_sse_s32.o dct36_sse.o dct64_sse.o synth_sse.o
+
+all: $(LIBNAME)
+
+$(LIBNAME): $(OBJ)
+	$(AR) cru $@ $(OBJ)
+	$(RANLIB) $@
+
+%.o: %.c
+	$(COMPILE) -c -o $@ $<
+
+#%.o: %.S
+#	$(COMPILE) -x assembler-with-cpp -c $< -o $@
+%.o: asm_nasm/%.asm
+	$(AS) $(ASFLAGS) -o $@ $<
