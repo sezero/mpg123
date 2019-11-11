@@ -8,8 +8,8 @@
 
 #include "mpg123lib_intern.h"
 #include "icy2utf8.h"
-#include "debug.h"
 
+/* this also includes debug.h: */
 #include "gapless.h"
 
 #define SEEKFRAME(mh) ((mh)->ignoreframe < 0 ? 0 : (mh)->ignoreframe)
