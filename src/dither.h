@@ -17,7 +17,10 @@ enum mpg123_noise_type
 	,mpg123_highpass_tpdf_noise
 };
 
+#ifdef MPG123_NOISE
 void mpg123_noise(float* table, size_t count, enum mpg123_noise_type noisetype);
+#endif
+
 void dither_table_init(float *dithertable);
 
 #endif

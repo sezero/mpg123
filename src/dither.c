@@ -44,6 +44,7 @@ static float rand_xorshift32(uint32_t *seed)
 	return fi.f;
 }
 
+#ifdef MPG123_NOISE
 static void white_noise(float *table, size_t count)
 {
 	size_t i;
@@ -61,6 +62,7 @@ static void tpdf_noise(float *table, size_t count)
 	for(i=0; i<count; ++i)
 	table[i] = rand_xorshift32(&seed) + rand_xorshift32(&seed);
 }
+#endif
 
 static void highpass_tpdf_noise(float *table, size_t count)
 {
@@ -100,6 +102,7 @@ static void highpass_tpdf_noise(float *table, size_t count)
 	}
 }
 
+#ifdef MPG123_NOISE
 void mpg123_noise(float* table, size_t count, enum mpg123_noise_type noisetype)
 {
 	switch(noisetype)
@@ -111,6 +114,7 @@ void mpg123_noise(float* table, size_t count, enum mpg123_noise_type noisetype)
 		break;
 	}
 }
+#endif
 
 /* Generate white noise and shape it with a high pass filter. */
 void dither_table_init(float *dithertable)
