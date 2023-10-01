@@ -8,7 +8,7 @@
 #AM_LDFLAGS = 
 AM_CPPFLAGS = -I$(top_srcdir)/src
 
-EXTRA_DIST = asm_nasm mpg123.h.in Makefile.emx Makefile.os2 Makefile.vs6 Makefile.w32 OS2_MSVC
+EXTRA_DIST = asm_nasm Makefile.emx Makefile.os2 Makefile.vs6 Makefile.w32 OS2_MSVC
 
 LIBS = @LIBMPG123_LIBS@
 
