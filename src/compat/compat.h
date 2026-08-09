@@ -63,6 +63,9 @@
 #ifndef ULONG_MAX
 #define ULONG_MAX ((unsigned long)-1)
 #endif
+#ifndef UINT_MAX
+#define UINT_MAX ((unsigned int)-1)
+#endif
 
 #ifndef INT64_MAX
 #define INT64_MAX 9223372036854775807LL

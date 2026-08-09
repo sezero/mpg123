@@ -449,7 +449,13 @@ size_t INT123_unintr_write(int fd, void const *buffer, size_t bytes)
 	while(bytes)
 	{
 		errno = 0;
+#if defined(MPG123_COMPAT_MSVCRT_IO)
+		// The MSVCRT function is with size in unsigned int.
+		unsigned int byte_part = bytes > UINT_MAX ? UINT_MAX : (unsigned int)bytes;
+		ptrdiff_t part = _write(fd, (char*)buffer+written, byte_part);
+#else
 		ptrdiff_t part = write(fd, (char*)buffer+written, bytes);
+#endif
 		// Just on short writes, we do not abort. Only when
 		// there was no successful operation (even zero write) at all.
 		// Any other error than EINTR ends things here.
@@ -477,7 +483,13 @@ size_t INT123_unintr_read(int fd, void *buffer, size_t bytes)
 	while(bytes)
 	{
 		errno = 0;
+#if defined(MPG123_COMPAT_MSVCRT_IO)
+		// The MSVCRT function is with size in unsigned int.
+		unsigned int byte_part = bytes > UINT_MAX ? UINT_MAX : (unsigned int)bytes;
+		ptrdiff_t part = _read(fd, (char*)buffer+got, byte_part);
+#else
 		ptrdiff_t part = read(fd, (char*)buffer+got, bytes);
+#endif
 		if(part > 0) // == 0 is end of file
 		{
 			bytes -= part;

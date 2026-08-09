@@ -11,6 +11,7 @@
   mpg123_id3v2.extra with description = owner and text = hex-encoded bytes
   (bug 384).
 - out123: Report filter setup for --verbose.
+- compat: use _read and _write for MSVCRT to silence compiler warnings
 
 1.33.7
 ------
