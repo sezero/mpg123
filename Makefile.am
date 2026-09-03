@@ -93,6 +93,7 @@ EXTRA_DIST += \
   ports/cmake/src/compat/CMakeLists.txt \
   ports/README \
   scripts/benchmark-cpu.pl \
+  scripts/find-unsync.sh \
   scripts/tag_lyrics.py \
   scripts/conplay \
   scripts/mpg123info
